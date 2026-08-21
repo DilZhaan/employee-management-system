@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginSchema, type LoginFormValues } from "@/features/auth/schemas/login.schema";
+import { sanitizeEmail } from "@/lib/sanitize";
 
 interface LoginFormProps {
   onSubmit: (values: LoginFormValues) => Promise<void> | void;
@@ -23,8 +24,15 @@ export function LoginForm({ onSubmit, errorMessage, isSubmitting = false }: Logi
     }
   });
 
+  function submit(values: LoginFormValues) {
+    onSubmit({
+      ...values,
+      email: sanitizeEmail(values.email)
+    });
+  }
+
   return (
-    <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+    <form className="space-y-5" onSubmit={form.handleSubmit(submit)} noValidate>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
