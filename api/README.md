@@ -78,6 +78,17 @@ make login-manager
 make login-employee
 ```
 
+Web app commands:
+
+```bash
+make web-install
+make web-dev
+make web-lint
+make web-test
+make web-build
+make web-verify
+```
+
 You can override any `.env` value inline:
 
 ```bash

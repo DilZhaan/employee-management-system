@@ -26,7 +26,7 @@ JWT_AUDIENCE ?= EMS.Clients
 JWT_EXPIRATION_MINUTES ?= 60
 SEED_PASSWORD ?=
 
-.PHONY: help env-example docker-up docker-down docker-ps docker-logs restore build test verify clean format run migrate secrets-init secrets-set health swagger login-admin login-manager login-employee web-install web-dev web-lint web-build web-verify
+.PHONY: help env-example docker-up docker-down docker-ps docker-logs restore build test verify clean format run migrate secrets-init secrets-set health swagger login-admin login-manager login-employee web-install web-dev web-lint web-test web-build web-verify
 
 help:
 	@echo "Available commands:"
@@ -53,8 +53,9 @@ help:
 	@echo "  make web-install      Install web dependencies"
 	@echo "  make web-dev          Start the React web app"
 	@echo "  make web-lint         Lint the React web app"
+	@echo "  make web-test         Test the React web app"
 	@echo "  make web-build        Build the React web app"
-	@echo "  make web-verify       Lint and build the React web app"
+	@echo "  make web-verify       Lint, test, and build the React web app"
 
 env-example:
 	@test -f .env || cp .env.example .env
@@ -62,16 +63,16 @@ env-example:
 
 docker-up:
 	@test -n "$(POSTGRES_PASSWORD)" || (echo "Set POSTGRES_PASSWORD, for example: make docker-up POSTGRES_PASSWORD=local-password" && exit 1)
-	POSTGRES_PASSWORD="$(POSTGRES_PASSWORD)" docker compose up -d
+	@POSTGRES_PASSWORD="$(POSTGRES_PASSWORD)" docker compose up -d
 
 docker-down:
-	POSTGRES_PASSWORD="$(POSTGRES_PASSWORD)" docker compose down
+	@POSTGRES_PASSWORD="$(POSTGRES_PASSWORD)" docker compose down
 
 docker-ps:
-	POSTGRES_PASSWORD="$(POSTGRES_PASSWORD)" docker compose ps
+	@POSTGRES_PASSWORD="$(POSTGRES_PASSWORD)" docker compose ps
 
 docker-logs:
-	POSTGRES_PASSWORD="$(POSTGRES_PASSWORD)" docker compose logs -f postgres
+	@POSTGRES_PASSWORD="$(POSTGRES_PASSWORD)" docker compose logs -f postgres
 
 restore:
 	cd $(API_DIR) && dotnet restore EMS.sln
@@ -92,13 +93,13 @@ format:
 
 migrate:
 	@test -n "$(POSTGRES_PASSWORD)" || (echo "Set POSTGRES_PASSWORD" && exit 1)
-	cd $(API_DIR) && ConnectionStrings__DefaultConnection="$(CONNECTION_STRING)" dotnet ef database update --project src/EMS.Infrastructure --startup-project src/EMS.Api
+	@cd $(API_DIR) && ConnectionStrings__DefaultConnection="$(CONNECTION_STRING)" dotnet ef database update --project src/EMS.Infrastructure --startup-project src/EMS.Api
 
 run:
 	@test -n "$(POSTGRES_PASSWORD)" || (echo "Set POSTGRES_PASSWORD" && exit 1)
 	@test -n "$(JWT_SECRET)" || (echo "Set JWT_SECRET with at least 32 bytes" && exit 1)
 	@test -n "$(SEED_PASSWORD)" || (echo "Set SEED_PASSWORD for demo account seeding" && exit 1)
-	cd $(API_DIR) && \
+	@cd $(API_DIR) && \
 	ASPNETCORE_ENVIRONMENT="$(ASPNETCORE_ENVIRONMENT)" \
 	ASPNETCORE_URLS="$(ASPNETCORE_URLS)" \
 	Database__ApplyMigrationsOnStartup=true \
@@ -118,12 +119,12 @@ secrets-set:
 	@test -n "$(POSTGRES_PASSWORD)" || (echo "Set POSTGRES_PASSWORD" && exit 1)
 	@test -n "$(JWT_SECRET)" || (echo "Set JWT_SECRET with at least 32 bytes" && exit 1)
 	@test -n "$(SEED_PASSWORD)" || (echo "Set SEED_PASSWORD" && exit 1)
-	dotnet user-secrets set "ConnectionStrings:DefaultConnection" "$(CONNECTION_STRING)" --project $(API_PROJECT)
-	dotnet user-secrets set "Jwt:Secret" "$(JWT_SECRET)" --project $(API_PROJECT)
-	dotnet user-secrets set "Jwt:Issuer" "$(JWT_ISSUER)" --project $(API_PROJECT)
-	dotnet user-secrets set "Jwt:Audience" "$(JWT_AUDIENCE)" --project $(API_PROJECT)
-	dotnet user-secrets set "Jwt:ExpirationMinutes" "$(JWT_EXPIRATION_MINUTES)" --project $(API_PROJECT)
-	dotnet user-secrets set "SeedData:Password" "$(SEED_PASSWORD)" --project $(API_PROJECT)
+	@dotnet user-secrets set "ConnectionStrings:DefaultConnection" "$(CONNECTION_STRING)" --project $(API_PROJECT)
+	@dotnet user-secrets set "Jwt:Secret" "$(JWT_SECRET)" --project $(API_PROJECT)
+	@dotnet user-secrets set "Jwt:Issuer" "$(JWT_ISSUER)" --project $(API_PROJECT)
+	@dotnet user-secrets set "Jwt:Audience" "$(JWT_AUDIENCE)" --project $(API_PROJECT)
+	@dotnet user-secrets set "Jwt:ExpirationMinutes" "$(JWT_EXPIRATION_MINUTES)" --project $(API_PROJECT)
+	@dotnet user-secrets set "SeedData:Password" "$(SEED_PASSWORD)" --project $(API_PROJECT)
 
 health:
 	curl -i "$(BASE_URL)/health"
@@ -133,15 +134,15 @@ swagger:
 
 login-admin:
 	@test -n "$(SEED_PASSWORD)" || (echo "Set SEED_PASSWORD" && exit 1)
-	curl -i -H "Content-Type: application/json" -d '{"email":"admin@ems.local","password":"$(SEED_PASSWORD)"}' "$(BASE_URL)/api/v1/auth/login"
+	@curl -i -H "Content-Type: application/json" -d '{"email":"admin@ems.local","password":"$(SEED_PASSWORD)"}' "$(BASE_URL)/api/v1/auth/login"
 
 login-manager:
 	@test -n "$(SEED_PASSWORD)" || (echo "Set SEED_PASSWORD" && exit 1)
-	curl -i -H "Content-Type: application/json" -d '{"email":"manager@ems.local","password":"$(SEED_PASSWORD)"}' "$(BASE_URL)/api/v1/auth/login"
+	@curl -i -H "Content-Type: application/json" -d '{"email":"manager@ems.local","password":"$(SEED_PASSWORD)"}' "$(BASE_URL)/api/v1/auth/login"
 
 login-employee:
 	@test -n "$(SEED_PASSWORD)" || (echo "Set SEED_PASSWORD" && exit 1)
-	curl -i -H "Content-Type: application/json" -d '{"email":"employee@ems.local","password":"$(SEED_PASSWORD)"}' "$(BASE_URL)/api/v1/auth/login"
+	@curl -i -H "Content-Type: application/json" -d '{"email":"employee@ems.local","password":"$(SEED_PASSWORD)"}' "$(BASE_URL)/api/v1/auth/login"
 
 web-install:
 	cd $(WEB_DIR) && npm install
@@ -152,7 +153,10 @@ web-dev:
 web-lint:
 	cd $(WEB_DIR) && npm run lint
 
+web-test:
+	cd $(WEB_DIR) && npm run test
+
 web-build:
 	cd $(WEB_DIR) && npm run build
 
-web-verify: web-lint web-build
+web-verify: web-lint web-test web-build
