@@ -6,6 +6,7 @@ export
 endif
 
 API_DIR := api
+WEB_DIR := web
 SOLUTION := $(API_DIR)/EMS.sln
 API_PROJECT := $(API_DIR)/src/EMS.Api
 INFRA_PROJECT := $(API_DIR)/src/EMS.Infrastructure
@@ -25,7 +26,7 @@ JWT_AUDIENCE ?= EMS.Clients
 JWT_EXPIRATION_MINUTES ?= 60
 SEED_PASSWORD ?=
 
-.PHONY: help env-example docker-up docker-down docker-ps docker-logs restore build test verify clean format run migrate secrets-init secrets-set health swagger login-admin login-manager login-employee
+.PHONY: help env-example docker-up docker-down docker-ps docker-logs restore build test verify clean format run migrate secrets-init secrets-set health swagger login-admin login-manager login-employee web-install web-dev web-lint web-build web-verify
 
 help:
 	@echo "Available commands:"
@@ -49,6 +50,11 @@ help:
 	@echo "  make login-admin      Login with admin@ems.local using SEED_PASSWORD"
 	@echo "  make login-manager    Login with manager@ems.local using SEED_PASSWORD"
 	@echo "  make login-employee   Login with employee@ems.local using SEED_PASSWORD"
+	@echo "  make web-install      Install web dependencies"
+	@echo "  make web-dev          Start the React web app"
+	@echo "  make web-lint         Lint the React web app"
+	@echo "  make web-build        Build the React web app"
+	@echo "  make web-verify       Lint and build the React web app"
 
 env-example:
 	@test -f .env || cp .env.example .env
@@ -136,3 +142,17 @@ login-manager:
 login-employee:
 	@test -n "$(SEED_PASSWORD)" || (echo "Set SEED_PASSWORD" && exit 1)
 	curl -i -H "Content-Type: application/json" -d '{"email":"employee@ems.local","password":"$(SEED_PASSWORD)"}' "$(BASE_URL)/api/v1/auth/login"
+
+web-install:
+	cd $(WEB_DIR) && npm install
+
+web-dev:
+	cd $(WEB_DIR) && npm run dev
+
+web-lint:
+	cd $(WEB_DIR) && npm run lint
+
+web-build:
+	cd $(WEB_DIR) && npm run build
+
+web-verify: web-lint web-build
