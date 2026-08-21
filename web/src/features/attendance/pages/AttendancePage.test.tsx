@@ -109,12 +109,24 @@ describe("AttendancePage", () => {
 
   it("checks in with web device type", async () => {
     const user = userEvent.setup();
+    vi.mocked(attendanceApi.getMyAttendance).mockResolvedValue(paged([]));
 
     renderPage("Employee");
 
     await user.click(await screen.findByRole("button", { name: /check in/i }));
 
     await waitFor(() => expect(attendanceApi.checkIn).toHaveBeenCalledWith({ deviceType: "Web" }));
+  });
+
+  it("disables check-in and check-out after completed attendance", async () => {
+    vi.mocked(attendanceApi.getMyAttendance).mockResolvedValue(
+      paged([{ ...record, checkOutTime: "2026-01-02T11:00:00Z" }])
+    );
+
+    renderPage("Employee");
+
+    expect(await screen.findByRole("button", { name: /check in/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /check out/i })).toBeDisabled();
   });
 
   it("keeps manager filters in the URL", async () => {

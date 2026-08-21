@@ -36,6 +36,12 @@ VITE_API_BASE_URL=http://localhost:5186
 
 Only `VITE_*` values are browser-visible. Do not put secrets, database credentials, JWT signing keys, or passwords in web environment files.
 
+Backend dependency for web setup:
+
+- Start and configure the API first using `api/README.md`.
+- Seeded role accounts (`Admin`, `Manager`, `Employee`) are documented in `api/README.md`.
+- OpenAPI artifact is available at `/swagger` and `/swagger/v1/swagger.json` on the API host.
+
 ## Commands
 
 ```bash
@@ -123,3 +129,4 @@ src/
 ## Testing
 
 Tests cover authentication routing, login validation, employee and department management, attendance workflows, and leave workflows. API calls are mocked at the typed endpoint boundary so page behavior, forms, routing, query invalidation, and RBAC UX are exercised without relying on a live backend.
+

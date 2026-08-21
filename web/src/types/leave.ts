@@ -9,6 +9,7 @@ export const LEAVE_STATUSES = ["Pending", "Approved", "Rejected"] as const satis
 export interface LeaveRequestResponse {
   id: string;
   employeeId: string;
+  employeeCode: string;
   leaveType: LeaveType;
   startDate: string;
   endDate: string;

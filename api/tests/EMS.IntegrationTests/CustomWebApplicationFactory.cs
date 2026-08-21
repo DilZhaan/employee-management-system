@@ -408,6 +408,7 @@ internal sealed class FakeLeaveService : ILeaveService
         return new LeaveRequestResponse(
             id,
             FakeApplicationState.EmployeeId,
+            "EMP-001",
             LeaveType.Annual,
             DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1)),
             DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(2)),

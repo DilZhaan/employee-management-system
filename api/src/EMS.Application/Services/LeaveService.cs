@@ -49,7 +49,7 @@ public sealed class LeaveService : ILeaveService
             request.Reason);
 
         await _leaveRequestRepository.AddAsync(leaveRequest, cancellationToken);
-        return leaveRequest.ToResponse();
+        return leaveRequest.ToResponse(employee.EmployeeCode);
     }
 
     public async Task<PagedResult<LeaveRequestResponse>> GetMyLeaveRequestsAsync(
@@ -62,7 +62,8 @@ public sealed class LeaveService : ILeaveService
         await _queryValidator.ValidateAndThrowAsync(ownQuery, cancellationToken);
 
         var leaveRequests = await _leaveRequestRepository.GetPagedAsync(ownQuery, cancellationToken);
-        return leaveRequests.MapItems(leaveRequest => leaveRequest.ToResponse());
+        var employee = await GetActiveEmployeeAsync(employeeId, cancellationToken);
+        return leaveRequests.MapItems(leaveRequest => leaveRequest.ToResponse(employee.EmployeeCode));
     }
 
     public async Task<PagedResult<LeaveRequestResponse>> GetLeaveRequestsAsync(
@@ -72,7 +73,8 @@ public sealed class LeaveService : ILeaveService
         await _queryValidator.ValidateAndThrowAsync(query, cancellationToken);
 
         var leaveRequests = await _leaveRequestRepository.GetPagedAsync(query, cancellationToken);
-        return leaveRequests.MapItems(leaveRequest => leaveRequest.ToResponse());
+        var codesByEmployeeId = await GetEmployeeCodesByIdAsync(leaveRequests.Items.Select(item => item.EmployeeId), cancellationToken);
+        return leaveRequests.MapItems(leaveRequest => leaveRequest.ToResponse(codesByEmployeeId[leaveRequest.EmployeeId]));
     }
 
     public async Task<LeaveRequestResponse> ApproveLeaveAsync(
@@ -84,7 +86,8 @@ public sealed class LeaveService : ILeaveService
 
         leaveRequest.Approve(_currentUser.EmployeeId!.Value);
         await _leaveRequestRepository.UpdateAsync(leaveRequest, cancellationToken);
-        return leaveRequest.ToResponse();
+        var employeeCode = await GetEmployeeCodeAsync(leaveRequest.EmployeeId, cancellationToken);
+        return leaveRequest.ToResponse(employeeCode);
     }
 
     public async Task<LeaveRequestResponse> RejectLeaveAsync(
@@ -96,7 +99,8 @@ public sealed class LeaveService : ILeaveService
 
         leaveRequest.Reject(_currentUser.EmployeeId!.Value);
         await _leaveRequestRepository.UpdateAsync(leaveRequest, cancellationToken);
-        return leaveRequest.ToResponse();
+        var employeeCode = await GetEmployeeCodeAsync(leaveRequest.EmployeeId, cancellationToken);
+        return leaveRequest.ToResponse(employeeCode);
     }
 
     private Guid RequireAuthenticatedEmployeeId()
@@ -134,6 +138,31 @@ public sealed class LeaveService : ILeaveService
         }
 
         return leaveRequest;
+    }
+
+    private async Task<string> GetEmployeeCodeAsync(Guid employeeId, CancellationToken cancellationToken)
+    {
+        var employee = await _employeeRepository.GetByIdAsync(employeeId, cancellationToken);
+        if (employee is null)
+        {
+            throw new NotFoundException("Leave request employee was not found.");
+        }
+
+        return employee.EmployeeCode;
+    }
+
+    private async Task<Dictionary<Guid, string>> GetEmployeeCodesByIdAsync(IEnumerable<Guid> employeeIds, CancellationToken cancellationToken)
+    {
+        var distinctIds = employeeIds.Distinct().ToArray();
+        var result = new Dictionary<Guid, string>(distinctIds.Length);
+
+        foreach (var id in distinctIds)
+        {
+            var code = await GetEmployeeCodeAsync(id, cancellationToken);
+            result[id] = code;
+        }
+
+        return result;
     }
 
     private async Task EnsureCanReviewAsync(LeaveRequest leaveRequest, CancellationToken cancellationToken)

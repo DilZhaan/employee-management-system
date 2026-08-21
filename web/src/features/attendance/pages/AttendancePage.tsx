@@ -17,7 +17,7 @@ import { useAttendance, useCheckIn, useCheckOut, useMyAttendance } from "@/featu
 import { getPositiveInt, useListSearchParams } from "@/features/common/list-params";
 import { useDepartments } from "@/features/departments/hooks/useDepartments";
 import { clampToToday, todayDateOnly } from "@/lib/date-rules";
-import type { AttendanceQuery } from "@/types/attendance";
+import type { AttendanceQuery, AttendanceResponse } from "@/types/attendance";
 
 const defaultPageSize = 20;
 const validPageSizes = new Set([10, 20, 50]);
@@ -38,6 +38,7 @@ export function AttendancePage() {
     employeeId: searchParams.get("employeeId") || undefined
   };
   const myAttendanceQuery = useMyAttendance({ page: 1, pageSize: 10 });
+  const myTodayAttendanceQuery = useMyAttendance({ page: 1, pageSize: 20, from: todayDateOnly(), to: todayDateOnly() });
   const attendanceQuery = useAttendance(query, canViewTeam);
   const departmentsQuery = useDepartments({ page: 1, pageSize: 100, isActive: true });
   const checkInMutation = useCheckIn();
@@ -46,6 +47,9 @@ export function AttendancePage() {
   const tableQuery = canViewTeam ? attendanceQuery : myAttendanceQuery;
   const pageData = canViewTeam ? attendanceQuery.data : myAttendanceQuery.data;
   const today = todayDateOnly();
+  const todaySummary = deriveTodayAttendanceSummary(myTodayAttendanceQuery.data?.items ?? []);
+  const canCheckIn = todaySummary.state === "not_checked_in";
+  const canCheckOut = todaySummary.state === "checked_in";
 
   function handleCheckIn() {
     checkInMutation.mutate(
@@ -76,11 +80,11 @@ export function AttendancePage() {
           <CardDescription>Actions use the authenticated employee from your current session.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
-          <Button onClick={handleCheckIn} disabled={checkInMutation.isPending}>
+          <Button onClick={handleCheckIn} disabled={checkInMutation.isPending || !canCheckIn}>
             <LogIn className="size-4" aria-hidden="true" />
             {checkInMutation.isPending ? "Checking in..." : "Check in"}
           </Button>
-          <Button variant="outline" onClick={handleCheckOut} disabled={checkOutMutation.isPending}>
+          <Button variant="outline" onClick={handleCheckOut} disabled={checkOutMutation.isPending || !canCheckOut}>
             <LogOut className="size-4" aria-hidden="true" />
             {checkOutMutation.isPending ? "Checking out..." : "Check out"}
           </Button>
@@ -163,4 +167,24 @@ export function AttendancePage() {
       </Card>
     </section>
   );
+}
+
+function deriveTodayAttendanceSummary(records: AttendanceResponse[]): { state: "not_checked_in" | "checked_in" | "completed" } {
+  const latest = records.reduce<AttendanceResponse | null>((current, item) => {
+    if (!current) {
+      return item;
+    }
+
+    return new Date(item.checkInTime).getTime() > new Date(current.checkInTime).getTime() ? item : current;
+  }, null);
+
+  if (!latest) {
+    return { state: "not_checked_in" };
+  }
+
+  if (latest.checkOutTime) {
+    return { state: "completed" };
+  }
+
+  return { state: "checked_in" };
 }

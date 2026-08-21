@@ -5,6 +5,7 @@ namespace EMS.Application.DTOs.Leave;
 public sealed record LeaveRequestResponse(
     Guid Id,
     Guid EmployeeId,
+    string EmployeeCode,
     LeaveType LeaveType,
     DateOnly StartDate,
     DateOnly EndDate,

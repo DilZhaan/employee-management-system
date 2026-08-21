@@ -47,11 +47,12 @@ internal static class DomainMappingExtensions
             attendanceLog.DeviceType);
     }
 
-    public static LeaveRequestResponse ToResponse(this LeaveRequest leaveRequest)
+    public static LeaveRequestResponse ToResponse(this LeaveRequest leaveRequest, string employeeCode)
     {
         return new LeaveRequestResponse(
             leaveRequest.Id,
             leaveRequest.EmployeeId,
+            employeeCode,
             leaveRequest.LeaveType,
             leaveRequest.StartDate,
             leaveRequest.EndDate,

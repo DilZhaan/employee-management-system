@@ -42,6 +42,7 @@ const yesterday = addDays(todayDateOnly(), -1);
 const request: LeaveRequestResponse = {
   id: leaveId,
   employeeId,
+  employeeCode: "EMP001",
   leaveType: "Annual",
   startDate: "2026-01-10",
   endDate: "2026-01-11",

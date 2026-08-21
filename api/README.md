@@ -107,11 +107,16 @@ dotnet ef database update --project src/EMS.Infrastructure --startup-project src
 
 Seeded demo accounts:
 
-- `admin@ems.local`
-- `manager@ems.local`
-- `employee@ems.local`
+- Admin: `admin@ems.local` (`ADM-001`)
+- Manager: `manager@ems.local` (`MGR-001`)
+- Employee: `employee@ems.local` (`EMP-001`)
 
 All use the local demo password configured in `SeedData:Password`. These are development/demo accounts only.
+
+Database artifacts:
+
+- EF Core migrations are versioned in `api/src/EMS.Infrastructure/Persistence/Migrations/`.
+- Schema is generated/applied from migrations (`dotnet ef database update ...` command above), so separate `schema.sql`/`seed.sql` files are not required for this setup.
 
 ## Running
 
@@ -126,6 +131,11 @@ Launch settings expose:
 - HTTP: `http://localhost:5186`
 - HTTPS: `https://localhost:7181`
 - Swagger: `/swagger`
+
+API artifact references:
+
+- Swagger UI: `http://localhost:5186/swagger` (or HTTPS equivalent)
+- OpenAPI JSON: `http://localhost:5186/swagger/v1/swagger.json`
 
 ## Configuration
 
