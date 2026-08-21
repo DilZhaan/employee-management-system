@@ -1,0 +1,195 @@
+{
+  "info": {
+    "name": "Enterprise Employee Management System API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5186"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "demoPassword",
+      "value": ""
+    },
+    {
+      "key": "newEmployeePassword",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@ems.local\",\n  \"password\": \"{{demoPassword}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Departments",
+      "item": [
+        {
+          "name": "List Departments",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/departments?page=1&pageSize=20"
+          }
+        },
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/departments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Operations\",\n  \"code\": \"OPS\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employees",
+      "item": [
+        {
+          "name": "List Employees",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/employees?page=1&pageSize=20"
+          }
+        },
+        {
+          "name": "Create Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeCode\": \"EMP-100\",\n  \"firstName\": \"Demo\",\n  \"lastName\": \"Employee\",\n  \"email\": \"demo.employee@ems.local\",\n  \"password\": \"{{newEmployeePassword}}\",\n  \"phoneNumber\": \"+94110000100\",\n  \"departmentId\": \"{{departmentId}}\",\n  \"role\": \"Employee\",\n  \"managerId\": \"{{managerId}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "Check In",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/attendance/check-in",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceType\": \"Web\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Check Out",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/attendance/check-out"
+          }
+        },
+        {
+          "name": "My Attendance",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/attendance/me?page=1&pageSize=20"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leave",
+      "item": [
+        {
+          "name": "Submit Leave",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/leave-requests",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveType\": \"Annual\",\n  \"startDate\": \"2026-09-01\",\n  \"endDate\": \"2026-09-02\",\n  \"reason\": \"Family event\"\n}"
+            }
+          }
+        },
+        {
+          "name": "My Leave",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/leave-requests/me?page=1&pageSize=20"
+          }
+        },
+        {
+          "name": "Approve Leave",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/v1/leave-requests/{{leaveRequestId}}/approve"
+          }
+        },
+        {
+          "name": "Reject Leave",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/v1/leave-requests/{{leaveRequestId}}/reject"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -66,7 +66,7 @@ public sealed class AttendanceService : IAttendanceService
         var attendanceLog = await _attendanceRepository.GetActiveByEmployeeIdAsync(employeeId, cancellationToken);
         if (attendanceLog is null)
         {
-            throw new NotFoundException("Active attendance record was not found.");
+            throw new ConflictException("Employee does not have an active attendance record.");
         }
 
         attendanceLog.CheckOut(DateTime.UtcNow);

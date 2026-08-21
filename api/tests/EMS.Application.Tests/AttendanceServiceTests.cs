@@ -59,11 +59,11 @@ public sealed class AttendanceServiceTests
     }
 
     [Fact]
-    public async Task CheckOutAsync_WithoutActiveAttendance_ThrowsNotFoundException()
+    public async Task CheckOutAsync_WithoutActiveAttendance_ThrowsConflictException()
     {
         var fixture = CreateFixture();
 
-        await Assert.ThrowsAsync<NotFoundException>(() => fixture.Service.CheckOutAsync());
+        await Assert.ThrowsAsync<ConflictException>(() => fixture.Service.CheckOutAsync());
     }
 
     [Fact]
