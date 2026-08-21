@@ -31,7 +31,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[60] flex w-[calc(100%-2rem)] max-w-sm flex-col gap-3" role="status" aria-live="polite">
+      <div className="fixed bottom-4 right-4 z-60 flex w-[calc(100%-2rem)] max-w-sm flex-col gap-3" role="status" aria-live="polite">
         {messages.map((message) => (
           <div key={message.id} className={cn("rounded-lg border p-4 shadow-lg", toneStyles[message.tone])}>
             <div className="flex items-start justify-between gap-3">
