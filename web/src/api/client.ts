@@ -1,14 +1,15 @@
 import axios from "axios";
 import { notifyUnauthorized } from "@/auth/auth-events";
 import { tokenStorage } from "@/auth/token-storage";
+import { API_ROUTES } from "@/api/routes";
 import { API_BASE_URL } from "@/lib/constants";
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15_000,
   headers: {
-    Accept: "application/json"
-  }
+    Accept: "application/json",
+  },
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -23,15 +24,19 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401 && !isLoginRequest(error.config?.url)) {
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 401 &&
+      !isLoginRequest(error.config?.url)
+    ) {
       tokenStorage.remove();
       notifyUnauthorized();
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 function isLoginRequest(url: string | undefined): boolean {
-  return url?.includes("/api/v1/auth/login") === true;
+  return url?.includes(API_ROUTES.auth.login) === true;
 }

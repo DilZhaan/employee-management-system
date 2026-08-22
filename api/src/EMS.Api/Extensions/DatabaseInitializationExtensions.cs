@@ -6,6 +6,7 @@ namespace EMS.Api.Extensions;
 
 public static class DatabaseInitializationExtensions
 {
+    //this > Make this method available as an extension method on WebApplication
     public static async Task InitializeDatabaseAsync(this WebApplication app)
     {
         var applyMigrations = app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup");
