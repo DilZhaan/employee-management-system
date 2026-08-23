@@ -34,13 +34,14 @@ export function LeavePage() {
   const canReview = user?.role === "Admin" || user?.role === "Manager";
   const pageSizeParam = getPositiveInt(searchParams.get("pageSize"), defaultPageSize);
   const pageSize = validPageSizes.has(pageSizeParam) ? pageSizeParam : defaultPageSize;
+  const employeeSearch = searchParams.get("employeeSearch") || searchParams.get("employeeId") || undefined;
   const query: LeaveRequestQuery = {
     page: getPositiveInt(searchParams.get("page"), 1),
     pageSize,
     from: searchParams.get("from") || undefined,
     to: searchParams.get("to") || undefined,
     departmentId: searchParams.get("departmentId") || undefined,
-    employeeSearch: searchParams.get("employeeSearch") || undefined,
+    employeeSearch,
     status: getStatusParam(searchParams.get("status"))
   };
   const myLeaveQuery = useMyLeaveRequests({ page: 1, pageSize: 10 });
@@ -51,6 +52,7 @@ export function LeavePage() {
   const rejectMutation = useRejectLeaveRequest();
   const hasFilters = Boolean(query.from || query.to || query.departmentId || query.employeeSearch || query.status);
   const reviewData = leaveRequestsQuery.data;
+  const reviewItems = filterReviewItems(reviewData?.items ?? [], query.employeeSearch);
   useApiErrorToast(myLeaveQuery.error, "Unable to load leave history");
   useApiErrorToast(leaveRequestsQuery.error, "Unable to load review requests");
   useApiErrorToast(departmentsQuery.error, "Unable to load departments");
@@ -149,7 +151,7 @@ export function LeavePage() {
               <Input
                 id="leave-employee"
                 value={query.employeeSearch ?? ""}
-                onChange={(event) => updateSearchParams({ employeeSearch: event.target.value || undefined })}
+                onChange={(event) => updateSearchParams({ employeeSearch: event.target.value || undefined, employeeId: undefined })}
               />
             </div>
             <div className="flex items-end">
@@ -163,12 +165,12 @@ export function LeavePage() {
           {leaveRequestsQuery.isError ? (
             <ErrorState title="Unable to load requests." error={normalizeApiError(leaveRequestsQuery.error)} onRetry={() => void leaveRequestsQuery.refetch()} />
           ) : null}
-          {leaveRequestsQuery.isSuccess && (reviewData?.items.length ?? 0) === 0 ? (
+          {leaveRequestsQuery.isSuccess && reviewItems.length === 0 ? (
             <EmptyState title="No leave requests found." description={hasFilters ? "Try adjusting your filters." : "Requests awaiting review will appear here."} />
           ) : null}
-          {leaveRequestsQuery.isSuccess && (reviewData?.items.length ?? 0) > 0 ? (
+          {leaveRequestsQuery.isSuccess && reviewItems.length > 0 ? (
             <LeaveTable
-              requests={reviewData?.items ?? []}
+              requests={reviewItems}
               showEmployee
               canReview
               currentEmployeeId={user?.employeeId}
@@ -211,4 +213,15 @@ export function LeavePage() {
 
 function getStatusParam(value: string | null): LeaveStatus | undefined {
   return LEAVE_STATUSES.includes(value as LeaveStatus) ? (value as LeaveStatus) : undefined;
+}
+
+function filterReviewItems(items: LeaveRequestResponse[], employeeSearch?: string) {
+  const search = employeeSearch?.trim().toLowerCase();
+  if (!search) {
+    return items;
+  }
+
+  return items.filter((request) => {
+    return request.employeeCode.toLowerCase().includes(search) || request.employeeName.toLowerCase().includes(search);
+  });
 }

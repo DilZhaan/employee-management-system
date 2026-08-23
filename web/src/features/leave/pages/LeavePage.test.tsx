@@ -62,6 +62,15 @@ const ownRequest: LeaveRequestResponse = {
   employeeName: "Manager User"
 };
 
+const otherRequest: LeaveRequestResponse = {
+  ...request,
+  id: "77777777-7777-4777-8777-777777777777",
+  employeeId: "77777777-7777-4777-8777-777777777777",
+  employeeCode: "MGR001",
+  employeeName: "Nuwan Silva",
+  reason: "Training day"
+};
+
 const department: DepartmentResponse = {
   id: departmentId,
   code: "ENG",
@@ -184,13 +193,18 @@ describe("LeavePage", () => {
 
   it("searches review requests by employee text", async () => {
     const user = userEvent.setup();
+    vi.mocked(leaveApi.getLeaveRequests).mockResolvedValue(paged([request, otherRequest]));
 
     renderPage("Manager");
 
-    await user.type(await screen.findByLabelText("Employee"), "Amina");
+    expect(await screen.findByText("Training day")).toBeInTheDocument();
 
-    await waitFor(() => expect(screen.getByLabelText("location")).toHaveTextContent("employeeSearch=Amina"));
-    await waitFor(() => expect(leaveApi.getLeaveRequests).toHaveBeenCalledWith(expect.objectContaining({ employeeSearch: "Amina" })));
+    await user.type(await screen.findByLabelText("Employee"), "Demo");
+
+    await waitFor(() => expect(screen.getByLabelText("location")).toHaveTextContent("employeeSearch=Demo"));
+    await waitFor(() => expect(leaveApi.getLeaveRequests).toHaveBeenCalledWith(expect.objectContaining({ employeeSearch: "Demo" })));
+    await waitFor(() => expect(screen.queryByText("Training day")).not.toBeInTheDocument());
+    expect(screen.getAllByText("Family event").length).toBeGreaterThan(0);
   });
 });
 
