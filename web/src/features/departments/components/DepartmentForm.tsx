@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getMutationError } from "@/features/common/form-errors";
 import { departmentSchema, type DepartmentFormValues } from "@/features/departments/schemas/department.schema";
 import { sanitizeName, sanitizeSingleLineText } from "@/lib/sanitize";
 import type { DepartmentResponse } from "@/types/department";
@@ -11,13 +10,11 @@ import type { DepartmentResponse } from "@/types/department";
 interface DepartmentFormProps {
   department?: DepartmentResponse;
   isSubmitting: boolean;
-  error: unknown;
   onSubmit: (values: DepartmentFormValues) => void;
   onCancel: () => void;
 }
 
-export function DepartmentForm({ department, isSubmitting, error, onSubmit, onCancel }: DepartmentFormProps) {
-  const mutationError = getMutationError(error);
+export function DepartmentForm({ department, isSubmitting, onSubmit, onCancel }: DepartmentFormProps) {
   const {
     register,
     handleSubmit,
@@ -46,11 +43,6 @@ export function DepartmentForm({ department, isSubmitting, error, onSubmit, onCa
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit(submit)}>
-      {mutationError ? (
-        <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
-          {mutationError.detail ?? mutationError.title}
-        </div>
-      ) : null}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="department-code">Code</Label>

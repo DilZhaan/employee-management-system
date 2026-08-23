@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { normalizeApiError } from "@/api/errors";
 import { useMyAttendance, useAttendance } from "@/features/attendance/hooks/useAttendance";
+import { useApiErrorToast } from "@/features/common/useApiErrorToast";
 import { useDepartments } from "@/features/departments/hooks/useDepartments";
 import { useEmployees } from "@/features/employees/hooks/useEmployees";
 import { useLeaveRequests, useMyLeaveRequests } from "@/features/leave/hooks/useLeave";
@@ -164,6 +165,8 @@ function SummaryCard({
   isLoading: boolean;
   error: unknown;
 }) {
+  useApiErrorToast(error, `Unable to load ${title.toLowerCase()}`);
+
   return (
     <Card>
       <CardContent className="flex items-center justify-between gap-4 p-5">

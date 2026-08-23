@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui/toast-context";
 import { AttendanceTable } from "@/features/attendance/components/AttendanceTable";
 import { useAttendance, useCheckIn, useCheckOut, useMyAttendance } from "@/features/attendance/hooks/useAttendance";
 import { getPositiveInt, useListSearchParams } from "@/features/common/list-params";
+import { useApiErrorToast } from "@/features/common/useApiErrorToast";
 import { useDepartments } from "@/features/departments/hooks/useDepartments";
 import { clampToToday, todayDateOnly } from "@/lib/date-rules";
 import type { AttendanceQuery, AttendanceResponse } from "@/types/attendance";
@@ -51,6 +52,11 @@ export function AttendancePage() {
   const todayAttendanceLoaded = myTodayAttendanceQuery.isSuccess;
   const canCheckIn = todayAttendanceLoaded && todaySummary.state === "not_checked_in";
   const canCheckOut = todayAttendanceLoaded && todaySummary.state === "checked_in";
+  useApiErrorToast(myTodayAttendanceQuery.error, "Unable to load today's attendance");
+  useApiErrorToast(tableQuery.error, "Unable to load attendance");
+  useApiErrorToast(departmentsQuery.error, "Unable to load departments");
+  useApiErrorToast(checkInMutation.error, "Unable to check in");
+  useApiErrorToast(checkOutMutation.error, "Unable to check out");
 
   function handleCheckIn() {
     checkInMutation.mutate(
@@ -90,13 +96,6 @@ export function AttendancePage() {
             {checkOutMutation.isPending ? "Checking out..." : "Check out"}
           </Button>
         </CardContent>
-        {checkInMutation.error || checkOutMutation.error ? (
-          <CardContent>
-            <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
-              {normalizeApiError(checkInMutation.error ?? checkOutMutation.error).detail ?? normalizeApiError(checkInMutation.error ?? checkOutMutation.error).title}
-            </div>
-          </CardContent>
-        ) : null}
       </Card>
 
       <Card className="overflow-hidden">

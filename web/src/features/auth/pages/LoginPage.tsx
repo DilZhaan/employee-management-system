@@ -1,12 +1,11 @@
-import { useMemo } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Building2 } from "lucide-react";
-import { normalizeApiError } from "@/api/errors";
 import { useAuth } from "@/auth/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { useLogin } from "@/features/auth/hooks/useLogin";
 import type { LoginFormValues } from "@/features/auth/schemas/login.schema";
+import { useApiErrorToast } from "@/features/common/useApiErrorToast";
 
 interface RedirectState {
   from?: {
@@ -20,13 +19,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = (location.state as RedirectState | null)?.from?.pathname ?? "/dashboard";
-
-  const errorMessage = useMemo(() => {
-    if (!loginMutation.error) {
-      return undefined;
-    }
-
-    const error = normalizeApiError(loginMutation.error);
+  useApiErrorToast(loginMutation.error, "Sign in failed", (error) => {
     if (error.kind === "unauthenticated") {
       return "Invalid email or password.";
     }
@@ -36,7 +29,7 @@ export function LoginPage() {
     }
 
     return "Sign in failed. Please try again.";
-  }, [loginMutation.error]);
+  });
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -58,7 +51,7 @@ export function LoginPage() {
           <CardDescription>Employee Management System</CardDescription>
         </CardHeader>
         <CardContent>
-          <LoginForm onSubmit={handleSubmit} errorMessage={errorMessage} isSubmitting={loginMutation.isPending} />
+          <LoginForm onSubmit={handleSubmit} isSubmitting={loginMutation.isPending} />
         </CardContent>
       </Card>
     </main>

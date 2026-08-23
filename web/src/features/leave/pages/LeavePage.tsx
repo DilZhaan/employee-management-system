@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast-context";
 import { getPositiveInt, useListSearchParams } from "@/features/common/list-params";
+import { useApiErrorToast } from "@/features/common/useApiErrorToast";
 import { useDepartments } from "@/features/departments/hooks/useDepartments";
 import { LeaveRequestForm } from "@/features/leave/components/LeaveRequestForm";
 import { LeaveTable } from "@/features/leave/components/LeaveTable";
@@ -50,6 +51,12 @@ export function LeavePage() {
   const rejectMutation = useRejectLeaveRequest();
   const hasFilters = Boolean(query.from || query.to || query.departmentId || query.employeeId || query.status);
   const reviewData = leaveRequestsQuery.data;
+  useApiErrorToast(myLeaveQuery.error, "Unable to load leave history");
+  useApiErrorToast(leaveRequestsQuery.error, "Unable to load review requests");
+  useApiErrorToast(departmentsQuery.error, "Unable to load departments");
+  useApiErrorToast(createMutation.error, "Unable to submit leave request");
+  useApiErrorToast(approveMutation.error, "Unable to approve leave request");
+  useApiErrorToast(rejectMutation.error, "Unable to reject leave request");
 
   function submitLeave(values: LeaveRequestFormValues) {
     createMutation.mutate(values, {
@@ -85,7 +92,7 @@ export function LeavePage() {
           <CardDescription>Submit a leave request for your authenticated employee profile.</CardDescription>
         </CardHeader>
         <CardContent>
-          <LeaveRequestForm isSubmitting={createMutation.isPending} error={createMutation.error} onSubmit={submitLeave} />
+          <LeaveRequestForm isSubmitting={createMutation.isPending} onSubmit={submitLeave} />
         </CardContent>
       </Card>
 
@@ -184,11 +191,6 @@ export function LeavePage() {
             <DialogTitle>{reviewTarget?.action === "approve" ? "Approve leave request?" : "Reject leave request?"}</DialogTitle>
             <DialogDescription>This action updates the request status immediately.</DialogDescription>
           </DialogHeader>
-          {approveMutation.error || rejectMutation.error ? (
-            <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
-              {normalizeApiError(approveMutation.error ?? rejectMutation.error).detail ?? normalizeApiError(approveMutation.error ?? rejectMutation.error).title}
-            </div>
-          ) : null}
           <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button variant="outline" onClick={() => setReviewTarget(null)}>
               Cancel

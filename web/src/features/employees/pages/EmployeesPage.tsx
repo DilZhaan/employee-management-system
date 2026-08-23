@@ -16,6 +16,7 @@ import { useToast } from "@/components/ui/toast-context";
 import { useAuth } from "@/auth/use-auth";
 import { useListSearchParams, getOptionalBoolean, getPositiveInt } from "@/features/common/list-params";
 import { useDebouncedValue } from "@/features/common/useDebouncedValue";
+import { useApiErrorToast } from "@/features/common/useApiErrorToast";
 import { useDepartments } from "@/features/departments/hooks/useDepartments";
 import { EmployeeForm } from "@/features/employees/components/EmployeeForm";
 import { EmployeeTable } from "@/features/employees/components/EmployeeTable";
@@ -60,6 +61,12 @@ export function EmployeesPage() {
   const departments = useMemo(() => departmentsQuery.data?.items ?? [], [departmentsQuery.data?.items]);
   const managers = useMemo(() => managersQuery.data?.items ?? [], [managersQuery.data?.items]);
   const hasFilters = Boolean(query.search || query.departmentId || query.role || query.isActive !== undefined);
+  useApiErrorToast(employeesQuery.error, "Unable to load employees");
+  useApiErrorToast(departmentsQuery.error ?? managersQuery.error, "Unable to load employee references");
+  useApiErrorToast(createMutation.error, "Unable to create employee");
+  useApiErrorToast(updateMutation.error, "Unable to update employee");
+  useApiErrorToast(deactivateMutation.error, "Unable to deactivate employee");
+  useApiErrorToast(activateMutation.error, "Unable to activate employee");
 
   useEffect(() => {
     const current = searchParams.get("search") ?? "";
@@ -254,7 +261,6 @@ export function EmployeesPage() {
             departments={departments}
             managers={managers}
             isSubmitting={createMutation.isPending}
-            error={createMutation.error}
             onSubmit={handleCreate}
             onCancel={() => setCreateOpen(false)}
           />
@@ -274,7 +280,6 @@ export function EmployeesPage() {
               departments={departments}
               managers={managers}
               isSubmitting={updateMutation.isPending}
-              error={updateMutation.error}
               onSubmit={handleUpdate}
               onCancel={() => setEditingEmployee(null)}
             />
@@ -290,11 +295,6 @@ export function EmployeesPage() {
               {deactivatingEmployee ? `${formatFullName(deactivatingEmployee.firstName, deactivatingEmployee.lastName)} will be marked inactive.` : null}
             </DialogDescription>
           </DialogHeader>
-          {deactivateMutation.error ? (
-            <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
-              {normalizeApiError(deactivateMutation.error).detail ?? normalizeApiError(deactivateMutation.error).title}
-            </div>
-          ) : null}
           <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button variant="outline" onClick={() => setDeactivatingEmployee(null)}>
               Cancel
@@ -314,11 +314,6 @@ export function EmployeesPage() {
               {activatingEmployee ? `${formatFullName(activatingEmployee.firstName, activatingEmployee.lastName)} will be marked active.` : null}
             </DialogDescription>
           </DialogHeader>
-          {activateMutation.error ? (
-            <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
-              {normalizeApiError(activateMutation.error).detail ?? normalizeApiError(activateMutation.error).title}
-            </div>
-          ) : null}
           <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button variant="outline" onClick={() => setActivatingEmployee(null)}>
               Cancel

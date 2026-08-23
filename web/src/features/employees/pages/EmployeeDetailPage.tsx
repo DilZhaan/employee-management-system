@@ -9,6 +9,7 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
+import { useApiErrorToast } from "@/features/common/useApiErrorToast";
 import { useDepartments } from "@/features/departments/hooks/useDepartments";
 import { useEmployee, useEmployees } from "@/features/employees/hooks/useEmployees";
 import { formatDate, formatFullName } from "@/lib/format";
@@ -18,6 +19,8 @@ export function EmployeeDetailPage() {
   const employeeQuery = useEmployee(id ?? "");
   const departmentsQuery = useDepartments({ page: 1, pageSize: 100 });
   const managersQuery = useEmployees({ page: 1, pageSize: 100, isActive: true });
+  useApiErrorToast(employeeQuery.error, "Unable to load employee");
+  useApiErrorToast(departmentsQuery.error ?? managersQuery.error, "Unable to load employee references");
 
   if (!id) {
     return <ErrorState title="Unable to load employee." error={{ kind: "not-found", title: "Employee was not found.", original: null }} />;

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { getMutationError } from "@/features/common/form-errors";
 import { createEmployeeSchema, updateEmployeeSchema, type CreateEmployeeFormValues, type UpdateEmployeeFormValues } from "@/features/employees/schemas/employee.schema";
 import { sanitizeEmail, sanitizeName, sanitizePhone, sanitizeSingleLineText } from "@/lib/sanitize";
 import { EMPLOYEE_ROLES } from "@/types/auth";
@@ -21,14 +20,12 @@ interface EmployeeFormProps {
   departments: DepartmentResponse[];
   managers: EmployeeResponse[];
   isSubmitting: boolean;
-  error: unknown;
   onSubmit: (values: CreateEmployeeRequest | UpdateEmployeeRequest) => void;
   onCancel: () => void;
 }
 
-export function EmployeeForm({ mode, employee, departments, managers, isSubmitting, error, onSubmit, onCancel }: EmployeeFormProps) {
+export function EmployeeForm({ mode, employee, departments, managers, isSubmitting, onSubmit, onCancel }: EmployeeFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const mutationError = getMutationError(error);
   const isCreate = mode === "create";
   const schema = isCreate ? createEmployeeSchema : updateEmployeeSchema;
   const {
@@ -68,12 +65,6 @@ export function EmployeeForm({ mode, employee, departments, managers, isSubmitti
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit(submit)}>
-      {mutationError ? (
-        <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
-          {mutationError.detail ?? mutationError.title}
-        </div>
-      ) : null}
-
       <div className="grid gap-4 md:grid-cols-2">
         {isCreate ? (
           <Field id="employee-code" label="Employee code" error={"employeeCode" in errors ? errors.employeeCode?.message : undefined}>

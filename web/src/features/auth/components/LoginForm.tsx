@@ -10,11 +10,10 @@ import { sanitizeEmail } from "@/lib/sanitize";
 
 interface LoginFormProps {
   onSubmit: (values: LoginFormValues) => Promise<void> | void;
-  errorMessage?: string;
   isSubmitting?: boolean;
 }
 
-export function LoginForm({ onSubmit, errorMessage, isSubmitting = false }: LoginFormProps) {
+export function LoginForm({ onSubmit, isSubmitting = false }: LoginFormProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -77,12 +76,6 @@ export function LoginForm({ onSubmit, errorMessage, isSubmitting = false }: Logi
           </p>
         ) : null}
       </div>
-
-      {errorMessage ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-          {errorMessage}
-        </div>
-      ) : null}
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}

@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast-context";
 import { useDebouncedValue } from "@/features/common/useDebouncedValue";
+import { useApiErrorToast } from "@/features/common/useApiErrorToast";
 import { getOptionalBoolean, getPositiveInt, useListSearchParams } from "@/features/common/list-params";
 import { DepartmentForm } from "@/features/departments/components/DepartmentForm";
 import { DepartmentTable } from "@/features/departments/components/DepartmentTable";
@@ -51,6 +52,11 @@ export function DepartmentsPage() {
   const deactivateMutation = useDeactivateDepartment();
   const activateMutation = useActivateDepartment();
   const hasFilters = Boolean(query.search || query.isActive !== undefined);
+  useApiErrorToast(departmentsQuery.error, "Unable to load departments");
+  useApiErrorToast(createMutation.error, "Unable to create department");
+  useApiErrorToast(updateMutation.error, "Unable to update department");
+  useApiErrorToast(deactivateMutation.error, "Unable to deactivate department");
+  useApiErrorToast(activateMutation.error, "Unable to activate department");
 
   useEffect(() => {
     const current = searchParams.get("search") ?? "";
@@ -209,7 +215,7 @@ export function DepartmentsPage() {
             <DialogTitle>Add department</DialogTitle>
             <DialogDescription>Create a department record for employee assignment.</DialogDescription>
           </DialogHeader>
-          <DepartmentForm isSubmitting={createMutation.isPending} error={createMutation.error} onSubmit={handleCreate} onCancel={() => setCreateOpen(false)} />
+          <DepartmentForm isSubmitting={createMutation.isPending} onSubmit={handleCreate} onCancel={() => setCreateOpen(false)} />
         </DialogContent>
       </Dialog>
 
@@ -223,7 +229,6 @@ export function DepartmentsPage() {
             <DepartmentForm
               department={editingDepartment}
               isSubmitting={updateMutation.isPending}
-              error={updateMutation.error}
               onSubmit={handleUpdate}
               onCancel={() => setEditingDepartment(null)}
             />
@@ -237,11 +242,6 @@ export function DepartmentsPage() {
             <DialogTitle>Deactivate department?</DialogTitle>
             <DialogDescription>{deactivatingDepartment ? `${deactivatingDepartment.name} will be marked inactive.` : null}</DialogDescription>
           </DialogHeader>
-          {deactivateMutation.error ? (
-            <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
-              {normalizeApiError(deactivateMutation.error).detail ?? normalizeApiError(deactivateMutation.error).title}
-            </div>
-          ) : null}
           <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button variant="outline" onClick={() => setDeactivatingDepartment(null)}>
               Cancel
@@ -259,11 +259,6 @@ export function DepartmentsPage() {
             <DialogTitle>Activate department?</DialogTitle>
             <DialogDescription>{activatingDepartment ? `${activatingDepartment.name} will be marked active.` : null}</DialogDescription>
           </DialogHeader>
-          {activateMutation.error ? (
-            <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
-              {normalizeApiError(activateMutation.error).detail ?? normalizeApiError(activateMutation.error).title}
-            </div>
-          ) : null}
           <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button variant="outline" onClick={() => setActivatingDepartment(null)}>
               Cancel

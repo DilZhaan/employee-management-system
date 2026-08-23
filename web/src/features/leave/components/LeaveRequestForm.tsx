@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { getMutationError } from "@/features/common/form-errors";
 import { leaveRequestSchema, type LeaveRequestFormValues } from "@/features/leave/schemas/leave.schema";
 import { todayDateOnly } from "@/lib/date-rules";
 import { sanitizeMultilineText } from "@/lib/sanitize";
@@ -13,12 +12,10 @@ import { LEAVE_TYPES } from "@/types/leave";
 
 interface LeaveRequestFormProps {
   isSubmitting: boolean;
-  error: unknown;
   onSubmit: (values: LeaveRequestFormValues) => void;
 }
 
-export function LeaveRequestForm({ isSubmitting, error, onSubmit }: LeaveRequestFormProps) {
-  const mutationError = getMutationError(error);
+export function LeaveRequestForm({ isSubmitting, onSubmit }: LeaveRequestFormProps) {
   const today = todayDateOnly();
   const {
     register,
@@ -45,11 +42,6 @@ export function LeaveRequestForm({ isSubmitting, error, onSubmit }: LeaveRequest
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(submit)}>
-      {mutationError ? (
-        <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
-          {mutationError.detail ?? mutationError.title}
-        </div>
-      ) : null}
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="leave-type">Leave type</Label>
