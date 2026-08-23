@@ -76,4 +76,16 @@ public sealed class EmployeesController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPatch("{id:guid}/activate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ActivateEmployee(Guid id, CancellationToken cancellationToken)
+    {
+        await _employeeService.ActivateEmployeeAsync(id, cancellationToken);
+        _logger.LogInformation("Employee {EmployeeId} activated", id);
+
+        return NoContent();
+    }
 }

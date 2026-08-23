@@ -17,7 +17,8 @@ vi.mock("@/api/endpoints/employees", () => ({
   getEmployee: vi.fn(),
   createEmployee: vi.fn(),
   updateEmployee: vi.fn(),
-  deactivateEmployee: vi.fn()
+  deactivateEmployee: vi.fn(),
+  activateEmployee: vi.fn()
 }));
 
 vi.mock("@/api/endpoints/departments", () => ({
@@ -71,6 +72,16 @@ const employee: EmployeeResponse = {
   createdAt: "2026-01-02T00:00:00Z"
 };
 
+const inactiveEmployee: EmployeeResponse = {
+  ...employee,
+  id: "55555555-5555-4555-8555-555555555555",
+  employeeCode: "EMP004",
+  firstName: "Kamal",
+  lastName: "Inactive",
+  email: "kamal.inactive@ems.local",
+  isActive: false
+};
+
 function paged<TItem>(items: TItem[], page = 1, pageSize = 20): PagedResult<TItem> {
   return {
     items,
@@ -122,6 +133,7 @@ describe("EmployeesPage", () => {
       return Promise.resolve(paged([employee], query?.page ?? 1, query?.pageSize ?? 20));
     });
     vi.mocked(employeesApi.createEmployee).mockResolvedValue(employee);
+    vi.mocked(employeesApi.activateEmployee).mockResolvedValue();
   });
 
   afterEach(() => {
@@ -238,5 +250,23 @@ describe("EmployeesPage", () => {
 
     await waitFor(() => expect(employeesApi.createEmployee).toHaveBeenCalledWith(expect.objectContaining({ employeeCode: "EMP003", firstName: "Sara" })));
     await waitFor(() => expect(vi.mocked(employeesApi.getEmployees).mock.calls.length).toBeGreaterThanOrEqual(3));
+  });
+
+  it("activates an inactive employee", async () => {
+    const user = userEvent.setup();
+    vi.mocked(employeesApi.getEmployees).mockImplementation((query?: EmployeeQuery) => {
+      if (query?.pageSize === 100) {
+        return Promise.resolve(paged([manager], 1, 100));
+      }
+
+      return Promise.resolve(paged([inactiveEmployee], query?.page ?? 1, query?.pageSize ?? 20));
+    });
+
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: /activate kamal inactive/i }));
+    await user.click(screen.getByRole("button", { name: /^activate$/i }));
+
+    await waitFor(() => expect(employeesApi.activateEmployee).toHaveBeenCalledWith(inactiveEmployee.id));
   });
 });

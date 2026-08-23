@@ -53,6 +53,13 @@ const request: LeaveRequestResponse = {
   reviewedAt: null
 };
 
+const ownRequest: LeaveRequestResponse = {
+  ...request,
+  id: "66666666-6666-4666-8666-666666666666",
+  employeeId: "11111111-1111-1111-1111-111111111111",
+  employeeCode: "MGR001"
+};
+
 const department: DepartmentResponse = {
   id: departmentId,
   code: "ENG",
@@ -155,6 +162,16 @@ describe("LeavePage", () => {
     await user.click(screen.getByRole("button", { name: /^approve$/i }));
 
     await waitFor(() => expect(leaveApi.approveLeaveRequest).toHaveBeenCalledWith(leaveId));
+  });
+
+  it("does not show review actions for the current user's own request", async () => {
+    vi.mocked(leaveApi.getLeaveRequests).mockResolvedValue(paged([ownRequest]));
+
+    renderPage("Manager");
+
+    expect(await screen.findByText("Own request")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /approve leave request/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /reject leave request/i })).not.toBeInTheDocument();
   });
 });
 

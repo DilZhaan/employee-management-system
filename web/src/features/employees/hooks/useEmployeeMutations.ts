@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createEmployee, deactivateEmployee, updateEmployee } from "@/api/endpoints/employees";
+import { activateEmployee, createEmployee, deactivateEmployee, updateEmployee } from "@/api/endpoints/employees";
 import { departmentKeys } from "@/features/departments/api/query-keys";
 import { employeeKeys } from "@/features/employees/api/query-keys";
 import type { CreateEmployeeRequest, UpdateEmployeeRequest } from "@/types/employee";
@@ -33,6 +33,18 @@ export function useDeactivateEmployee() {
 
   return useMutation({
     mutationFn: (id: string) => deactivateEmployee(id),
+    onSuccess: (_data, id) => {
+      void queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: employeeKeys.detail(id) });
+    }
+  });
+}
+
+export function useActivateEmployee() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => activateEmployee(id),
     onSuccess: (_data, id) => {
       void queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
       void queryClient.invalidateQueries({ queryKey: employeeKeys.detail(id) });

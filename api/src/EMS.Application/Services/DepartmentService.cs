@@ -89,6 +89,13 @@ public sealed class DepartmentService : IDepartmentService
         await _departmentRepository.UpdateAsync(department, cancellationToken);
     }
 
+    public async Task ActivateDepartmentAsync(Guid departmentId, CancellationToken cancellationToken = default)
+    {
+        var department = await GetDepartmentAsync(departmentId, cancellationToken);
+        department.Activate();
+        await _departmentRepository.UpdateAsync(department, cancellationToken);
+    }
+
     private async Task<Department> GetDepartmentAsync(Guid departmentId, CancellationToken cancellationToken)
     {
         var department = await _departmentRepository.GetByIdAsync(departmentId, cancellationToken);

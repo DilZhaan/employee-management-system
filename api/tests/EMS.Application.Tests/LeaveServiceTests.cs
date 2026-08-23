@@ -67,6 +67,26 @@ public sealed class LeaveServiceTests
     }
 
     [Fact]
+    public async Task ApproveLeaveAsync_WhenAdminReviewsOwnLeave_ThrowsForbiddenException()
+    {
+        var fixture = CreateAdminFixture();
+        var leaveRequest = AddLeaveRequest(fixture.LeaveRepository, fixture.Admin!.Id);
+
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            fixture.Service.ApproveLeaveAsync(leaveRequest.Id));
+    }
+
+    [Fact]
+    public async Task RejectLeaveAsync_WhenManagerReviewsOwnLeave_ThrowsForbiddenException()
+    {
+        var fixture = CreateManagerFixture(isDirectManager: true);
+        var leaveRequest = AddLeaveRequest(fixture.LeaveRepository, fixture.Manager!.Id);
+
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            fixture.Service.RejectLeaveAsync(leaveRequest.Id));
+    }
+
+    [Fact]
     public async Task RejectLeaveAsync_UsesDomainRejectBehaviour()
     {
         var fixture = CreateAdminFixture();

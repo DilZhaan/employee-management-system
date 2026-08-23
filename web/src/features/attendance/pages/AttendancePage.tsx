@@ -48,8 +48,9 @@ export function AttendancePage() {
   const pageData = canViewTeam ? attendanceQuery.data : myAttendanceQuery.data;
   const today = todayDateOnly();
   const todaySummary = deriveTodayAttendanceSummary(myTodayAttendanceQuery.data?.items ?? []);
-  const canCheckIn = todaySummary.state === "not_checked_in";
-  const canCheckOut = todaySummary.state === "checked_in";
+  const todayAttendanceLoaded = myTodayAttendanceQuery.isSuccess;
+  const canCheckIn = todayAttendanceLoaded && todaySummary.state === "not_checked_in";
+  const canCheckOut = todayAttendanceLoaded && todaySummary.state === "checked_in";
 
   function handleCheckIn() {
     checkInMutation.mutate(

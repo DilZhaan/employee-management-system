@@ -19,7 +19,7 @@ import { useDebouncedValue } from "@/features/common/useDebouncedValue";
 import { useDepartments } from "@/features/departments/hooks/useDepartments";
 import { EmployeeForm } from "@/features/employees/components/EmployeeForm";
 import { EmployeeTable } from "@/features/employees/components/EmployeeTable";
-import { useCreateEmployee, useDeactivateEmployee, useUpdateEmployee } from "@/features/employees/hooks/useEmployeeMutations";
+import { useActivateEmployee, useCreateEmployee, useDeactivateEmployee, useUpdateEmployee } from "@/features/employees/hooks/useEmployeeMutations";
 import { useEmployees } from "@/features/employees/hooks/useEmployees";
 import { formatFullName } from "@/lib/format";
 import { EMPLOYEE_ROLES, type EmployeeRole } from "@/types/auth";
@@ -36,6 +36,7 @@ export function EmployeesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<EmployeeResponse | null>(null);
   const [deactivatingEmployee, setDeactivatingEmployee] = useState<EmployeeResponse | null>(null);
+  const [activatingEmployee, setActivatingEmployee] = useState<EmployeeResponse | null>(null);
   const debouncedSearch = useDebouncedValue(searchInput);
   const pageSizeParam = getPositiveInt(searchParams.get("pageSize"), defaultPageSize);
   const pageSize = validPageSizes.has(pageSizeParam) ? pageSizeParam : defaultPageSize;
@@ -55,6 +56,7 @@ export function EmployeesPage() {
   const createMutation = useCreateEmployee();
   const updateMutation = useUpdateEmployee(editingEmployee?.id ?? "");
   const deactivateMutation = useDeactivateEmployee();
+  const activateMutation = useActivateEmployee();
   const departments = useMemo(() => departmentsQuery.data?.items ?? [], [departmentsQuery.data?.items]);
   const managers = useMemo(() => managersQuery.data?.items ?? [], [managersQuery.data?.items]);
   const hasFilters = Boolean(query.search || query.departmentId || query.role || query.isActive !== undefined);
@@ -113,6 +115,19 @@ export function EmployeesPage() {
       onSuccess: () => {
         showToast({ title: "Employee deactivated", tone: "success" });
         setDeactivatingEmployee(null);
+      }
+    });
+  }
+
+  function confirmActivate() {
+    if (!activatingEmployee) {
+      return;
+    }
+
+    activateMutation.mutate(activatingEmployee.id, {
+      onSuccess: () => {
+        showToast({ title: "Employee activated", tone: "success" });
+        setActivatingEmployee(null);
       }
     });
   }
@@ -212,6 +227,7 @@ export function EmployeesPage() {
             canManage={canManage}
             onEdit={setEditingEmployee}
             onDeactivate={setDeactivatingEmployee}
+            onActivate={setActivatingEmployee}
           />
         ) : null}
 
@@ -285,6 +301,30 @@ export function EmployeesPage() {
             </Button>
             <Button onClick={confirmDeactivate} disabled={deactivateMutation.isPending}>
               {deactivateMutation.isPending ? "Deactivating..." : "Deactivate"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(activatingEmployee)} onOpenChange={(open) => !open && setActivatingEmployee(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Activate employee?</DialogTitle>
+            <DialogDescription>
+              {activatingEmployee ? `${formatFullName(activatingEmployee.firstName, activatingEmployee.lastName)} will be marked active.` : null}
+            </DialogDescription>
+          </DialogHeader>
+          {activateMutation.error ? (
+            <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
+              {normalizeApiError(activateMutation.error).detail ?? normalizeApiError(activateMutation.error).title}
+            </div>
+          ) : null}
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={() => setActivatingEmployee(null)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmActivate} disabled={activateMutation.isPending}>
+              {activateMutation.isPending ? "Activating..." : "Activate"}
             </Button>
           </div>
         </DialogContent>

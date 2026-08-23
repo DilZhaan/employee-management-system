@@ -93,6 +93,24 @@ public sealed class EmployeeServiceTests
         Assert.Equal(employee, employeeRepository.UpdatedEmployee);
     }
 
+    [Fact]
+    public async Task ActivateEmployeeAsync_WhenEmployeeIsInactive_ActivatesEmployee()
+    {
+        var department = TestEntities.Department();
+        var employee = TestEntities.Employee(department.Id);
+        employee.Deactivate();
+        var employeeRepository = new InMemoryEmployeeRepository();
+        employeeRepository.Employees.Add(employee);
+        var departmentRepository = new InMemoryDepartmentRepository();
+        departmentRepository.Departments.Add(department);
+        var service = CreateService(employeeRepository, departmentRepository);
+
+        await service.ActivateEmployeeAsync(employee.Id);
+
+        Assert.True(employee.IsActive);
+        Assert.Equal(employee, employeeRepository.UpdatedEmployee);
+    }
+
     private static EmployeeService CreateService(
         InMemoryEmployeeRepository employeeRepository,
         InMemoryDepartmentRepository departmentRepository,

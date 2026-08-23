@@ -170,6 +170,11 @@ public sealed class LeaveService : ILeaveService
         var currentEmployeeId = RequireAuthenticatedEmployeeId();
         var role = _currentUser.Role;
 
+        if (leaveRequest.EmployeeId == currentEmployeeId)
+        {
+            throw new ForbiddenException("Employees cannot review their own leave requests.");
+        }
+
         if (role == EmployeeRole.Admin)
         {
             return;

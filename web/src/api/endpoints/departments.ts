@@ -51,3 +51,7 @@ export async function updateDepartment(
 export async function deactivateDepartment(id: string): Promise<void> {
   await apiClient.delete(API_ROUTES.departments.byId(id));
 }
+
+export async function activateDepartment(id: string): Promise<void> {
+  await apiClient.patch(`${API_ROUTES.departments.byId(id)}/activate`);
+}

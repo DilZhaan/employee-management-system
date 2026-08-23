@@ -14,4 +14,6 @@ public interface IEmployeeService
     Task<EmployeeResponse> UpdateEmployeeAsync(Guid employeeId, UpdateEmployeeRequest request, CancellationToken cancellationToken = default);
 
     Task DeactivateEmployeeAsync(Guid employeeId, CancellationToken cancellationToken = default);
+
+    Task ActivateEmployeeAsync(Guid employeeId, CancellationToken cancellationToken = default);
 }

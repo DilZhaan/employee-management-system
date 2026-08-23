@@ -177,6 +177,11 @@ internal sealed class FakeDepartmentService : IDepartmentService
         return Task.CompletedTask;
     }
 
+    public Task ActivateDepartmentAsync(Guid departmentId, CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
+
     public Task<DepartmentResponse> GetDepartmentByIdAsync(Guid departmentId, CancellationToken cancellationToken = default)
     {
         if (departmentId == Guid.Empty)
@@ -235,6 +240,11 @@ internal sealed class FakeEmployeeService : IEmployeeService
     }
 
     public Task DeactivateEmployeeAsync(Guid employeeId, CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task ActivateEmployeeAsync(Guid employeeId, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }

@@ -18,7 +18,7 @@ import { useDebouncedValue } from "@/features/common/useDebouncedValue";
 import { getOptionalBoolean, getPositiveInt, useListSearchParams } from "@/features/common/list-params";
 import { DepartmentForm } from "@/features/departments/components/DepartmentForm";
 import { DepartmentTable } from "@/features/departments/components/DepartmentTable";
-import { useCreateDepartment, useDeactivateDepartment, useUpdateDepartment } from "@/features/departments/hooks/useDepartmentMutations";
+import { useActivateDepartment, useCreateDepartment, useDeactivateDepartment, useUpdateDepartment } from "@/features/departments/hooks/useDepartmentMutations";
 import { useDepartments } from "@/features/departments/hooks/useDepartments";
 import type { DepartmentFormValues } from "@/features/departments/schemas/department.schema";
 import type { DepartmentQuery, DepartmentResponse } from "@/types/department";
@@ -34,6 +34,7 @@ export function DepartmentsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState<DepartmentResponse | null>(null);
   const [deactivatingDepartment, setDeactivatingDepartment] = useState<DepartmentResponse | null>(null);
+  const [activatingDepartment, setActivatingDepartment] = useState<DepartmentResponse | null>(null);
   const debouncedSearch = useDebouncedValue(searchInput);
   const pageSizeParam = getPositiveInt(searchParams.get("pageSize"), defaultPageSize);
   const pageSize = validPageSizes.has(pageSizeParam) ? pageSizeParam : defaultPageSize;
@@ -48,6 +49,7 @@ export function DepartmentsPage() {
   const createMutation = useCreateDepartment();
   const updateMutation = useUpdateDepartment(editingDepartment?.id ?? "");
   const deactivateMutation = useDeactivateDepartment();
+  const activateMutation = useActivateDepartment();
   const hasFilters = Boolean(query.search || query.isActive !== undefined);
 
   useEffect(() => {
@@ -101,6 +103,19 @@ export function DepartmentsPage() {
       onSuccess: () => {
         setDeactivatingDepartment(null);
         showToast({ title: "Department deactivated", tone: "success" });
+      }
+    });
+  }
+
+  function confirmActivate() {
+    if (!activatingDepartment) {
+      return;
+    }
+
+    activateMutation.mutate(activatingDepartment.id, {
+      onSuccess: () => {
+        setActivatingDepartment(null);
+        showToast({ title: "Department activated", tone: "success" });
       }
     });
   }
@@ -167,7 +182,13 @@ export function DepartmentsPage() {
           />
         ) : null}
         {departmentsQuery.isSuccess && departmentCount > 0 ? (
-          <DepartmentTable departments={pageData?.items ?? []} canManage={canManage} onEdit={setEditingDepartment} onDeactivate={setDeactivatingDepartment} />
+          <DepartmentTable
+            departments={pageData?.items ?? []}
+            canManage={canManage}
+            onEdit={setEditingDepartment}
+            onDeactivate={setDeactivatingDepartment}
+            onActivate={setActivatingDepartment}
+          />
         ) : null}
 
         {pageData && departmentCount > 0 ? (
@@ -227,6 +248,28 @@ export function DepartmentsPage() {
             </Button>
             <Button onClick={confirmDeactivate} disabled={deactivateMutation.isPending}>
               {deactivateMutation.isPending ? "Deactivating..." : "Deactivate"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(activatingDepartment)} onOpenChange={(open) => !open && setActivatingDepartment(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Activate department?</DialogTitle>
+            <DialogDescription>{activatingDepartment ? `${activatingDepartment.name} will be marked active.` : null}</DialogDescription>
+          </DialogHeader>
+          {activateMutation.error ? (
+            <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
+              {normalizeApiError(activateMutation.error).detail ?? normalizeApiError(activateMutation.error).title}
+            </div>
+          ) : null}
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={() => setActivatingDepartment(null)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmActivate} disabled={activateMutation.isPending}>
+              {activateMutation.isPending ? "Activating..." : "Activate"}
             </Button>
           </div>
         </DialogContent>

@@ -122,6 +122,13 @@ public sealed class EmployeeService : IEmployeeService
         await _employeeRepository.UpdateAsync(employee, cancellationToken);
     }
 
+    public async Task ActivateEmployeeAsync(Guid employeeId, CancellationToken cancellationToken = default)
+    {
+        var employee = await GetEmployeeAsync(employeeId, cancellationToken);
+        employee.Activate();
+        await _employeeRepository.UpdateAsync(employee, cancellationToken);
+    }
+
     private async Task<Employee> GetEmployeeAsync(Guid employeeId, CancellationToken cancellationToken)
     {
         var employee = await _employeeRepository.GetByIdAsync(employeeId, cancellationToken);

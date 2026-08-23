@@ -14,9 +14,10 @@ interface EmployeeTableProps {
   canManage: boolean;
   onEdit: (employee: EmployeeResponse) => void;
   onDeactivate: (employee: EmployeeResponse) => void;
+  onActivate: (employee: EmployeeResponse) => void;
 }
 
-export function EmployeeTable({ employees, departments, managers, canManage, onEdit, onDeactivate }: EmployeeTableProps) {
+export function EmployeeTable({ employees, departments, managers, canManage, onEdit, onDeactivate, onActivate }: EmployeeTableProps) {
   const departmentById = new Map(departments.map((department) => [department.id, department]));
   const managerById = new Map(managers.map((manager) => [manager.id, manager]));
 
@@ -79,16 +80,18 @@ export function EmployeeTable({ employees, departments, managers, canManage, onE
                         <Button variant="ghost" size="icon" onClick={() => onEdit(employee)} aria-label={`Edit ${employee.firstName} ${employee.lastName}`}>
                           <Pencil className="size-4" aria-hidden="true" />
                         </Button>
-                        {employee.isActive ? (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onDeactivate(employee)}
-                            aria-label={`Deactivate ${employee.firstName} ${employee.lastName}`}
-                          >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => (employee.isActive ? onDeactivate(employee) : onActivate(employee))}
+                          aria-label={`${employee.isActive ? "Deactivate" : "Activate"} ${employee.firstName} ${employee.lastName}`}
+                        >
+                          {employee.isActive ? (
                             <Power className="size-4" aria-hidden="true" />
-                          </Button>
-                        ) : null}
+                          ) : (
+                            <Power className="size-4 text-emerald-700" aria-hidden="true" />
+                          )}
+                        </Button>
                       </>
                     ) : null}
                   </div>

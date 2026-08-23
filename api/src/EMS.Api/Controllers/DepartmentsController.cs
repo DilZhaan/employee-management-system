@@ -81,4 +81,17 @@ public sealed class DepartmentsController : ControllerBase
 
         return NoContent();
     }
+
+    [Authorize(Policy = "AdminOnly")]
+    [HttpPatch("{id:guid}/activate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ActivateDepartment(Guid id, CancellationToken cancellationToken)
+    {
+        await _departmentService.ActivateDepartmentAsync(id, cancellationToken);
+        _logger.LogInformation("Department {DepartmentId} activated", id);
+
+        return NoContent();
+    }
 }

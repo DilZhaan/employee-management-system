@@ -160,6 +160,7 @@ export function LeavePage() {
               requests={reviewData?.items ?? []}
               showEmployee
               canReview
+              currentEmployeeId={user?.employeeId}
               onApprove={(request) => setReviewTarget({ request, action: "approve" })}
               onReject={(request) => setReviewTarget({ request, action: "reject" })}
             />

@@ -102,6 +102,8 @@ internal sealed class InMemoryDepartmentRepository : IDepartmentRepository
 {
     public List<Department> Departments { get; } = [];
 
+    public Department? UpdatedDepartment { get; private set; }
+
     public Task AddAsync(Department department, CancellationToken cancellationToken = default)
     {
         Departments.Add(department);
@@ -143,6 +145,7 @@ internal sealed class InMemoryDepartmentRepository : IDepartmentRepository
 
     public Task UpdateAsync(Department department, CancellationToken cancellationToken = default)
     {
+        UpdatedDepartment = department;
         return Task.CompletedTask;
     }
 }

@@ -9,9 +9,10 @@ interface DepartmentTableProps {
   canManage: boolean;
   onEdit: (department: DepartmentResponse) => void;
   onDeactivate: (department: DepartmentResponse) => void;
+  onActivate: (department: DepartmentResponse) => void;
 }
 
-export function DepartmentTable({ departments, canManage, onEdit, onDeactivate }: DepartmentTableProps) {
+export function DepartmentTable({ departments, canManage, onEdit, onDeactivate, onActivate }: DepartmentTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[680px] border-collapse text-left text-sm">
@@ -51,11 +52,18 @@ export function DepartmentTable({ departments, canManage, onEdit, onDeactivate }
                     <Button variant="ghost" size="icon" onClick={() => onEdit(department)} aria-label={`Edit ${department.name}`}>
                       <Pencil className="size-4" aria-hidden="true" />
                     </Button>
-                    {department.isActive ? (
-                      <Button variant="ghost" size="icon" onClick={() => onDeactivate(department)} aria-label={`Deactivate ${department.name}`}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => (department.isActive ? onDeactivate(department) : onActivate(department))}
+                      aria-label={`${department.isActive ? "Deactivate" : "Activate"} ${department.name}`}
+                    >
+                      {department.isActive ? (
                         <Power className="size-4" aria-hidden="true" />
-                      </Button>
-                    ) : null}
+                      ) : (
+                        <Power className="size-4 text-emerald-700" aria-hidden="true" />
+                      )}
+                    </Button>
                   </div>
                 </td>
               ) : null}

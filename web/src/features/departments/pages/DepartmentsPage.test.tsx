@@ -16,7 +16,8 @@ vi.mock("@/api/endpoints/departments", () => ({
   getDepartment: vi.fn(),
   createDepartment: vi.fn(),
   updateDepartment: vi.fn(),
-  deactivateDepartment: vi.fn()
+  deactivateDepartment: vi.fn(),
+  activateDepartment: vi.fn()
 }));
 
 vi.mock("@/api/endpoints/employees", () => ({
@@ -35,6 +36,14 @@ const department: DepartmentResponse = {
   name: "Engineering",
   isActive: true,
   createdAt: "2026-01-01T00:00:00Z"
+};
+
+const inactiveDepartment: DepartmentResponse = {
+  ...department,
+  id: "33333333-3333-4333-8333-333333333333",
+  code: "OPS",
+  name: "Operations",
+  isActive: false
 };
 
 function paged<TItem>(items: TItem[]): PagedResult<TItem> {
@@ -75,6 +84,7 @@ describe("DepartmentsPage", () => {
     window.sessionStorage.clear();
     vi.mocked(departmentsApi.getDepartments).mockResolvedValue(paged([department]));
     vi.mocked(departmentsApi.createDepartment).mockResolvedValue(department);
+    vi.mocked(departmentsApi.activateDepartment).mockResolvedValue();
   });
 
   afterEach(() => {
@@ -131,5 +141,17 @@ describe("DepartmentsPage", () => {
     expect(await screen.findByText("Engineering")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /add department/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /edit engineering/i })).not.toBeInTheDocument();
+  });
+
+  it("activates an inactive department", async () => {
+    const user = userEvent.setup();
+    vi.mocked(departmentsApi.getDepartments).mockResolvedValue(paged([inactiveDepartment]));
+
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: /activate operations/i }));
+    await user.click(screen.getByRole("button", { name: /^activate$/i }));
+
+    expect(departmentsApi.activateDepartment).toHaveBeenCalledWith(inactiveDepartment.id);
   });
 });

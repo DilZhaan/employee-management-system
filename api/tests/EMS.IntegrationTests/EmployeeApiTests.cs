@@ -84,6 +84,16 @@ public sealed class EmployeeApiTests : IClassFixture<CustomWebApplicationFactory
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
+    [Fact]
+    public async Task ActivateEmployee_ReturnsNoContent()
+    {
+        var client = CustomWebApplicationFactory.CreateClientWithRole(_factory, EmployeeRole.Admin);
+
+        var response = await client.PatchAsync($"/api/v1/employees/{FakeApplicationState.EmployeeId}/activate", null);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
     private static CreateEmployeeRequest CreateRequest(string email)
     {
         return new CreateEmployeeRequest(

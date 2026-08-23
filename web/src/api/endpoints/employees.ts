@@ -51,3 +51,7 @@ export async function updateEmployee(
 export async function deactivateEmployee(id: string): Promise<void> {
   await apiClient.delete(API_ROUTES.employees.byId(id));
 }
+
+export async function activateEmployee(id: string): Promise<void> {
+  await apiClient.patch(`${API_ROUTES.employees.byId(id)}/activate`);
+}
