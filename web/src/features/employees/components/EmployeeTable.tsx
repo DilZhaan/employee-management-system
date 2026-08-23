@@ -22,7 +22,7 @@ export function EmployeeTable({ employees, departments, managers, canManage, onE
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[920px] border-collapse text-left text-sm">
+      <table className="w-full min-w-230 border-collapse text-left text-sm">
         <thead className="bg-slate-50 text-xs uppercase tracking-normal text-slate-500">
           <tr>
             <th scope="col" className="px-4 py-3 font-semibold">

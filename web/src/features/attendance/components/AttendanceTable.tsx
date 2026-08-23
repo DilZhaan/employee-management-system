@@ -10,7 +10,7 @@ interface AttendanceTableProps {
 export function AttendanceTable({ records, showEmployee = false }: AttendanceTableProps) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+      <table className="w-full min-w-190 border-collapse text-left text-sm">
         <thead className="bg-slate-50 text-xs uppercase tracking-normal text-slate-500">
           <tr>
             {showEmployee ? <th className="px-4 py-3 font-semibold">Employee ID</th> : null}
