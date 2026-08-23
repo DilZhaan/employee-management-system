@@ -15,7 +15,6 @@ export function useAttendance(query: AttendanceQuery, enabled: boolean) {
   return useQuery({
     queryKey: attendanceKeys.list(query),
     queryFn: () => getAttendance(query),
-    placeholderData: keepPreviousData,
     enabled
   });
 }

@@ -17,6 +17,8 @@ public sealed class LeaveServiceTests
         var response = await fixture.Service.CreateLeaveRequestAsync(CreateRequest());
 
         Assert.Equal(fixture.Employee.Id, response.EmployeeId);
+        Assert.Equal(fixture.Employee.EmployeeCode, response.EmployeeCode);
+        Assert.Equal($"{fixture.Employee.FirstName} {fixture.Employee.LastName}", response.EmployeeName);
         Assert.Equal(LeaveStatus.Pending, response.Status);
         Assert.Equal(fixture.Employee.Id, fixture.LeaveRepository.AddedLeaveRequest?.EmployeeId);
     }

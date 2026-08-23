@@ -99,6 +99,7 @@ function createLeaveRequest(overrides: Partial<LeaveRequest> = {}): LeaveRequest
     id: "leave-1",
     employeeId: "emp-1",
     employeeCode: "EMP001",
+    employeeName: "Demo Employee",
     leaveType: "Annual",
     startDate: "2026-08-25",
     endDate: "2026-08-27",

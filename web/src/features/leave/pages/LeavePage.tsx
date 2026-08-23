@@ -40,7 +40,7 @@ export function LeavePage() {
     from: searchParams.get("from") || undefined,
     to: searchParams.get("to") || undefined,
     departmentId: searchParams.get("departmentId") || undefined,
-    employeeId: searchParams.get("employeeId") || undefined,
+    employeeSearch: searchParams.get("employeeSearch") || undefined,
     status: getStatusParam(searchParams.get("status"))
   };
   const myLeaveQuery = useMyLeaveRequests({ page: 1, pageSize: 10 });
@@ -49,7 +49,7 @@ export function LeavePage() {
   const createMutation = useCreateLeaveRequest();
   const approveMutation = useApproveLeaveRequest();
   const rejectMutation = useRejectLeaveRequest();
-  const hasFilters = Boolean(query.from || query.to || query.departmentId || query.employeeId || query.status);
+  const hasFilters = Boolean(query.from || query.to || query.departmentId || query.employeeSearch || query.status);
   const reviewData = leaveRequestsQuery.data;
   useApiErrorToast(myLeaveQuery.error, "Unable to load leave history");
   useApiErrorToast(leaveRequestsQuery.error, "Unable to load review requests");
@@ -145,8 +145,12 @@ export function LeavePage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="leave-employee">Employee ID</Label>
-              <Input id="leave-employee" value={query.employeeId ?? ""} onChange={(event) => updateSearchParams({ employeeId: event.target.value || undefined })} />
+              <Label htmlFor="leave-employee">Employee</Label>
+              <Input
+                id="leave-employee"
+                value={query.employeeSearch ?? ""}
+                onChange={(event) => updateSearchParams({ employeeSearch: event.target.value || undefined })}
+              />
             </div>
             <div className="flex items-end">
               <Button type="button" variant="outline" onClick={resetFilters} disabled={!hasFilters}>

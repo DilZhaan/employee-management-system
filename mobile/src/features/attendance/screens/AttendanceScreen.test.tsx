@@ -88,6 +88,8 @@ function createRecord(overrides: Partial<AttendanceLog> = {}): AttendanceLog {
   return {
     id: "att-1",
     employeeId: "emp-1",
+    employeeCode: "EMP001",
+    employeeName: "Demo Employee",
     checkInTime: "2026-08-21T03:30:00Z",
     checkOutTime: "2026-08-21T11:45:00Z",
     workDate: "2026-08-21",

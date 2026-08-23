@@ -9,6 +9,8 @@ export const DEVICE_TYPES = ["Web", "Mobile"] as const satisfies readonly Device
 export interface AttendanceResponse {
   id: string;
   employeeId: string;
+  employeeCode: string;
+  employeeName: string;
   checkInTime: string;
   checkOutTime?: string | null;
   workDate: string;
@@ -21,6 +23,7 @@ export interface AttendanceQuery extends PaginationQuery {
   to?: string;
   departmentId?: string;
   employeeId?: string;
+  employeeSearch?: string;
 }
 
 export interface CheckInRequest {

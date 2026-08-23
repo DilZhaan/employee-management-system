@@ -5,6 +5,8 @@ namespace EMS.Application.DTOs.Attendance;
 public sealed record AttendanceResponse(
     Guid Id,
     Guid EmployeeId,
+    string EmployeeCode,
+    string EmployeeName,
     DateTime CheckInTime,
     DateTime? CheckOutTime,
     DateOnly WorkDate,

@@ -19,7 +19,7 @@ export function LeaveTable({ requests, showEmployee = false, canReview = false, 
       <table className="w-full min-w-[900px] border-collapse text-left text-sm">
         <thead className="bg-slate-50 text-xs uppercase tracking-normal text-slate-500">
           <tr>
-            {showEmployee ? <th className="px-4 py-3 font-semibold">Employee Code</th> : null}
+            {showEmployee ? <th className="px-4 py-3 font-semibold">Employee</th> : null}
             <th className="px-4 py-3 font-semibold">Type</th>
             <th className="px-4 py-3 font-semibold">Dates</th>
             <th className="px-4 py-3 font-semibold">Reason</th>
@@ -34,7 +34,12 @@ export function LeaveTable({ requests, showEmployee = false, canReview = false, 
 
             return (
               <tr key={request.id} className="bg-white">
-                {showEmployee ? <td className="px-4 py-3 font-mono text-xs text-slate-700">{request.employeeCode}</td> : null}
+                {showEmployee ? (
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-slate-950">{request.employeeName}</div>
+                    <div className="font-mono text-xs text-slate-500">{request.employeeCode}</div>
+                  </td>
+                ) : null}
                 <td className="px-4 py-3 text-slate-950">{request.leaveType}</td>
                 <td className="px-4 py-3 text-slate-700">
                   {formatDate(request.startDate)} to {formatDate(request.endDate)}

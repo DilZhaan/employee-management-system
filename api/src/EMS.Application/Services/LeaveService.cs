@@ -49,7 +49,7 @@ public sealed class LeaveService : ILeaveService
             request.Reason);
 
         await _leaveRequestRepository.AddAsync(leaveRequest, cancellationToken);
-        return leaveRequest.ToResponse(employee.EmployeeCode);
+        return leaveRequest.ToResponse(employee.EmployeeCode, GetEmployeeName(employee));
     }
 
     public async Task<PagedResult<LeaveRequestResponse>> GetMyLeaveRequestsAsync(
@@ -63,7 +63,7 @@ public sealed class LeaveService : ILeaveService
 
         var leaveRequests = await _leaveRequestRepository.GetPagedAsync(ownQuery, cancellationToken);
         var employee = await GetActiveEmployeeAsync(employeeId, cancellationToken);
-        return leaveRequests.MapItems(leaveRequest => leaveRequest.ToResponse(employee.EmployeeCode));
+        return leaveRequests.MapItems(leaveRequest => leaveRequest.ToResponse(employee.EmployeeCode, GetEmployeeName(employee)));
     }
 
     public async Task<PagedResult<LeaveRequestResponse>> GetLeaveRequestsAsync(
@@ -73,8 +73,12 @@ public sealed class LeaveService : ILeaveService
         await _queryValidator.ValidateAndThrowAsync(query, cancellationToken);
 
         var leaveRequests = await _leaveRequestRepository.GetPagedAsync(query, cancellationToken);
-        var codesByEmployeeId = await GetEmployeeCodesByIdAsync(leaveRequests.Items.Select(item => item.EmployeeId), cancellationToken);
-        return leaveRequests.MapItems(leaveRequest => leaveRequest.ToResponse(codesByEmployeeId[leaveRequest.EmployeeId]));
+        var employeesById = await GetEmployeeSummariesByIdAsync(leaveRequests.Items.Select(item => item.EmployeeId), cancellationToken);
+        return leaveRequests.MapItems(leaveRequest =>
+        {
+            var employee = employeesById[leaveRequest.EmployeeId];
+            return leaveRequest.ToResponse(employee.Code, employee.Name);
+        });
     }
 
     public async Task<LeaveRequestResponse> ApproveLeaveAsync(
@@ -86,8 +90,8 @@ public sealed class LeaveService : ILeaveService
 
         leaveRequest.Approve(_currentUser.EmployeeId!.Value);
         await _leaveRequestRepository.UpdateAsync(leaveRequest, cancellationToken);
-        var employeeCode = await GetEmployeeCodeAsync(leaveRequest.EmployeeId, cancellationToken);
-        return leaveRequest.ToResponse(employeeCode);
+        var employee = await GetEmployeeSummaryAsync(leaveRequest.EmployeeId, cancellationToken);
+        return leaveRequest.ToResponse(employee.Code, employee.Name);
     }
 
     public async Task<LeaveRequestResponse> RejectLeaveAsync(
@@ -99,8 +103,8 @@ public sealed class LeaveService : ILeaveService
 
         leaveRequest.Reject(_currentUser.EmployeeId!.Value);
         await _leaveRequestRepository.UpdateAsync(leaveRequest, cancellationToken);
-        var employeeCode = await GetEmployeeCodeAsync(leaveRequest.EmployeeId, cancellationToken);
-        return leaveRequest.ToResponse(employeeCode);
+        var employee = await GetEmployeeSummaryAsync(leaveRequest.EmployeeId, cancellationToken);
+        return leaveRequest.ToResponse(employee.Code, employee.Name);
     }
 
     private Guid RequireAuthenticatedEmployeeId()
@@ -140,7 +144,7 @@ public sealed class LeaveService : ILeaveService
         return leaveRequest;
     }
 
-    private async Task<string> GetEmployeeCodeAsync(Guid employeeId, CancellationToken cancellationToken)
+    private async Task<EmployeeSummary> GetEmployeeSummaryAsync(Guid employeeId, CancellationToken cancellationToken)
     {
         var employee = await _employeeRepository.GetByIdAsync(employeeId, cancellationToken);
         if (employee is null)
@@ -148,18 +152,17 @@ public sealed class LeaveService : ILeaveService
             throw new NotFoundException("Leave request employee was not found.");
         }
 
-        return employee.EmployeeCode;
+        return new EmployeeSummary(employee.EmployeeCode, GetEmployeeName(employee));
     }
 
-    private async Task<Dictionary<Guid, string>> GetEmployeeCodesByIdAsync(IEnumerable<Guid> employeeIds, CancellationToken cancellationToken)
+    private async Task<Dictionary<Guid, EmployeeSummary>> GetEmployeeSummariesByIdAsync(IEnumerable<Guid> employeeIds, CancellationToken cancellationToken)
     {
         var distinctIds = employeeIds.Distinct().ToArray();
-        var result = new Dictionary<Guid, string>(distinctIds.Length);
+        var result = new Dictionary<Guid, EmployeeSummary>(distinctIds.Length);
 
         foreach (var id in distinctIds)
         {
-            var code = await GetEmployeeCodeAsync(id, cancellationToken);
-            result[id] = code;
+            result[id] = await GetEmployeeSummaryAsync(id, cancellationToken);
         }
 
         return result;
@@ -196,4 +199,11 @@ public sealed class LeaveService : ILeaveService
             throw new ForbiddenException("Managers can only review direct subordinate leave requests.");
         }
     }
+
+    private static string GetEmployeeName(Employee employee)
+    {
+        return $"{employee.FirstName} {employee.LastName}".Trim();
+    }
+
+    private sealed record EmployeeSummary(string Code, string Name);
 }

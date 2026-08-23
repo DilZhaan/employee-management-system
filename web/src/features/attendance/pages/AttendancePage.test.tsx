@@ -39,6 +39,8 @@ const tomorrow = addDays(todayDateOnly(), 1);
 const record: AttendanceResponse = {
   id: attendanceId,
   employeeId,
+  employeeCode: "EMP001",
+  employeeName: "Demo Employee",
   checkInTime: "2026-01-02T03:00:00Z",
   checkOutTime: null,
   workDate: "2026-01-02",
@@ -103,7 +105,8 @@ describe("AttendancePage", () => {
   it("renders attendance data", async () => {
     renderPage();
 
-    expect(await screen.findByText(employeeId)).toBeInTheDocument();
+    expect(await screen.findByText("EMP001")).toBeInTheDocument();
+    expect(screen.getByText("Demo Employee")).toBeInTheDocument();
     expect(screen.getByText("Present")).toBeInTheDocument();
   });
 
@@ -134,10 +137,10 @@ describe("AttendancePage", () => {
 
     renderPage("Manager");
 
-    await user.type(await screen.findByLabelText("Employee ID"), employeeId);
+    await user.type(await screen.findByLabelText("Employee"), "Amina");
     await user.selectOptions(screen.getByLabelText("Department"), department.id);
 
-    await waitFor(() => expect(screen.getByLabelText("location")).toHaveTextContent(`employeeId=${employeeId}`));
+    await waitFor(() => expect(screen.getByLabelText("location")).toHaveTextContent("employeeSearch=Amina"));
     expect(screen.getByLabelText("location")).toHaveTextContent(`departmentId=${departmentId}`);
   });
 

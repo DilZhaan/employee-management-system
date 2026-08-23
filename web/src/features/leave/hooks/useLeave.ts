@@ -15,7 +15,6 @@ export function useLeaveRequests(query: LeaveRequestQuery, enabled: boolean) {
   return useQuery({
     queryKey: leaveKeys.list(query),
     queryFn: () => getLeaveRequests(query),
-    placeholderData: keepPreviousData,
     enabled
   });
 }

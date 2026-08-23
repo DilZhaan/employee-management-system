@@ -54,6 +54,8 @@ describe("ApprovalReviewScreen", () => {
     const view = await renderWithQueryClient(<ApprovalReviewScreen />);
 
     expect(view.getByText("Leave Review")).toBeTruthy();
+    expect(view.getByText("Employee")).toBeTruthy();
+    expect(view.getByText("Demo Employee")).toBeTruthy();
     expect(view.getByText("Employee Code")).toBeTruthy();
     expect(view.getByText("EMP001")).toBeTruthy();
     expect(view.getByText("Family event")).toBeTruthy();
@@ -107,6 +109,18 @@ describe("ApprovalReviewScreen", () => {
     expect(view.getByText("This request has already been processed.")).toBeTruthy();
   });
 
+  it("hides actions for own pending request", async () => {
+    mockedUseAuth.mockReturnValue({
+      user: { employeeId: "emp-1", email: "manager@ems.local", role: "Manager", expiresAt: 9999999999 }
+    } as never);
+
+    const view = await renderWithQueryClient(<ApprovalReviewScreen />);
+
+    expect(view.queryByText("Approve")).toBeNull();
+    expect(view.queryByText("Reject")).toBeNull();
+    expect(view.getByText("You cannot review your own request.")).toBeTruthy();
+  });
+
   it("shows mutation errors without logging out session", async () => {
     mockedUseApproveLeaveRequest.mockReturnValue({
       ...createMutationMock(),
@@ -157,6 +171,7 @@ function createLeaveRequest(overrides: Partial<LeaveRequest> = {}): LeaveRequest
     id: "leave-1",
     employeeId: "emp-1",
     employeeCode: "EMP001",
+    employeeName: "Demo Employee",
     leaveType: "Annual",
     startDate: "2026-08-25",
     endDate: "2026-08-27",

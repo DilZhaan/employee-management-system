@@ -345,6 +345,8 @@ internal sealed class FakeAttendanceService : IAttendanceService
         return new AttendanceResponse(
             Guid.NewGuid(),
             employeeId,
+            "EMP-001",
+            "Demo Employee",
             DateTime.UtcNow.AddHours(-1),
             checkOutTime,
             DateOnly.FromDateTime(DateTime.UtcNow),
@@ -419,6 +421,7 @@ internal sealed class FakeLeaveService : ILeaveService
             id,
             FakeApplicationState.EmployeeId,
             "EMP-001",
+            "Demo Employee",
             LeaveType.Annual,
             DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1)),
             DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(2)),

@@ -38,7 +38,7 @@ describe("ApprovalsScreen", () => {
   it("renders pending requests", async () => {
     mockedUseReviewableLeaveRequests.mockReturnValue(
       createReviewResult({
-        items: [createLeaveRequest({ employeeCode: "EMP003" })]
+        items: [createLeaveRequest({ employeeCode: "EMP003", employeeName: "Alex Morgan" })]
       })
     );
 
@@ -46,7 +46,8 @@ describe("ApprovalsScreen", () => {
 
     expect(view.getByText("Leave Approvals")).toBeTruthy();
     expect(view.getByText("Pending")).toBeTruthy();
-    expect(view.getByText("Employee: EMP003")).toBeTruthy();
+    expect(view.getByText("Employee: Alex Morgan")).toBeTruthy();
+    expect(view.getByText("Code: EMP003")).toBeTruthy();
   });
 
   it("renders empty state", async () => {
@@ -132,6 +133,7 @@ function createLeaveRequest(overrides: Partial<LeaveRequest> = {}): LeaveRequest
     id: "leave-1",
     employeeId: "emp-1",
     employeeCode: "EMP001",
+    employeeName: "Demo Employee",
     leaveType: "Annual",
     startDate: "2026-08-25",
     endDate: "2026-08-27",

@@ -6,6 +6,7 @@ public sealed record LeaveRequestResponse(
     Guid Id,
     Guid EmployeeId,
     string EmployeeCode,
+    string EmployeeName,
     LeaveType LeaveType,
     DateOnly StartDate,
     DateOnly EndDate,

@@ -32,6 +32,19 @@ public sealed class LeaveRequestRepository : ILeaveRequestRepository
             leaveRequests = leaveRequests.Where(leaveRequest => leaveRequest.EmployeeId == query.EmployeeId.Value);
         }
 
+        if (!string.IsNullOrWhiteSpace(query.EmployeeSearch))
+        {
+            var searchPattern = $"%{query.EmployeeSearch.Trim()}%";
+            var employeeIds = _dbContext.Employees
+                .Where(employee =>
+                    EF.Functions.ILike(employee.EmployeeCode, searchPattern)
+                    || EF.Functions.ILike(employee.FirstName, searchPattern)
+                    || EF.Functions.ILike(employee.LastName, searchPattern)
+                    || EF.Functions.ILike(employee.FirstName + " " + employee.LastName, searchPattern))
+                .Select(employee => employee.Id);
+            leaveRequests = leaveRequests.Where(leaveRequest => employeeIds.Contains(leaveRequest.EmployeeId));
+        }
+
         if (query.DepartmentId.HasValue)
         {
             var employeeIds = _dbContext.Employees

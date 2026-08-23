@@ -54,6 +54,7 @@ export function ApprovalReviewScreen() {
   }
 
   const isPendingStatus = request.status === "Pending";
+  const isOwnRequest = user?.employeeId === request.employeeId;
   const isMutating = approveMutation.isPending || rejectMutation.isPending;
   const actionError = approveMutation.error ?? rejectMutation.error;
 
@@ -63,6 +64,7 @@ export function ApprovalReviewScreen() {
         <AppText variant="title">Leave Review</AppText>
 
         <Card style={styles.card}>
+          <Row label="Employee" value={request.employeeName} />
           <Row label="Employee Code" value={request.employeeCode} />
           <Row label="Leave Type" value={request.leaveType} />
           <Row label="Dates" value={`${formatDateOnly(request.startDate)} — ${formatDateOnly(request.endDate)}`} />
@@ -73,7 +75,9 @@ export function ApprovalReviewScreen() {
 
         {actionError ? <ErrorState title="Unable to process request." message={getLeaveErrorMessage(actionError)} /> : null}
 
-        {isPendingStatus ? (
+        {isPendingStatus && isOwnRequest ? <AppText muted>You cannot review your own request.</AppText> : null}
+
+        {isPendingStatus && !isOwnRequest ? (
           <View style={styles.actions}>
             <Button
               label={approveMutation.isPending ? "Approving..." : "Approve"}
@@ -118,9 +122,9 @@ export function ApprovalReviewScreen() {
               }}
             />
           </View>
-        ) : (
+        ) : !isPendingStatus ? (
           <AppText muted>This request has already been processed.</AppText>
-        )}
+        ) : null}
       </View>
     </Screen>
   );

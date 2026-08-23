@@ -6,6 +6,8 @@ export type DeviceType = "Web" | "Mobile";
 export interface AttendanceLog {
   id: string;
   employeeId: string;
+  employeeCode: string;
+  employeeName: string;
   checkInTime: string;
   checkOutTime: string | null;
   workDate: string;

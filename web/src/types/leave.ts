@@ -10,6 +10,7 @@ export interface LeaveRequestResponse {
   id: string;
   employeeId: string;
   employeeCode: string;
+  employeeName: string;
   leaveType: LeaveType;
   startDate: string;
   endDate: string;
@@ -22,6 +23,7 @@ export interface LeaveRequestResponse {
 
 export interface LeaveRequestQuery extends PaginationQuery {
   employeeId?: string;
+  employeeSearch?: string;
   departmentId?: string;
   status?: LeaveStatus;
   from?: string;

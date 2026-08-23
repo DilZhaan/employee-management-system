@@ -17,6 +17,8 @@ public sealed class AttendanceServiceTests
         var response = await fixture.Service.CheckInAsync(new CheckInRequest(DeviceType.Mobile));
 
         Assert.Equal(fixture.Employee.Id, response.EmployeeId);
+        Assert.Equal(fixture.Employee.EmployeeCode, response.EmployeeCode);
+        Assert.Equal($"{fixture.Employee.FirstName} {fixture.Employee.LastName}", response.EmployeeName);
         Assert.Equal(DeviceType.Mobile, response.DeviceType);
         Assert.Equal(fixture.AttendancePolicy.Status, response.Status);
         Assert.NotNull(fixture.AttendancePolicy.ReceivedCheckInTime);
@@ -104,6 +106,7 @@ public sealed class AttendanceServiceTests
 
         Assert.Single(response.Items);
         Assert.Equal(fixture.Employee.Id, response.Items.Single().EmployeeId);
+        Assert.Equal(fixture.Employee.EmployeeCode, response.Items.Single().EmployeeCode);
     }
 
     private static AttendanceFixture CreateFixture()

@@ -55,13 +55,13 @@ public sealed class AttendanceService : IAttendanceService
         var attendanceLog = new AttendanceLog(employee.Id, checkInTime, status, request.DeviceType);
 
         await _attendanceRepository.AddAsync(attendanceLog, cancellationToken);
-        return attendanceLog.ToResponse();
+        return attendanceLog.ToResponse(employee.EmployeeCode, GetEmployeeName(employee));
     }
 
     public async Task<AttendanceResponse> CheckOutAsync(CancellationToken cancellationToken = default)
     {
         var employeeId = RequireAuthenticatedEmployeeId();
-        await GetActiveEmployeeAsync(employeeId, cancellationToken);
+        var employee = await GetActiveEmployeeAsync(employeeId, cancellationToken);
 
         var attendanceLog = await _attendanceRepository.GetActiveByEmployeeIdAsync(employeeId, cancellationToken);
         if (attendanceLog is null)
@@ -71,7 +71,7 @@ public sealed class AttendanceService : IAttendanceService
 
         attendanceLog.CheckOut(DateTime.UtcNow);
         await _attendanceRepository.UpdateAsync(attendanceLog, cancellationToken);
-        return attendanceLog.ToResponse();
+        return attendanceLog.ToResponse(employee.EmployeeCode, GetEmployeeName(employee));
     }
 
     public async Task<PagedResult<AttendanceResponse>> GetMyAttendanceAsync(
@@ -84,7 +84,8 @@ public sealed class AttendanceService : IAttendanceService
         await _queryValidator.ValidateAndThrowAsync(ownQuery, cancellationToken);
 
         var attendance = await _attendanceRepository.GetPagedAsync(ownQuery, cancellationToken);
-        return attendance.MapItems(attendanceLog => attendanceLog.ToResponse());
+        var employee = await GetActiveEmployeeAsync(employeeId, cancellationToken);
+        return attendance.MapItems(attendanceLog => attendanceLog.ToResponse(employee.EmployeeCode, GetEmployeeName(employee)));
     }
 
     public async Task<PagedResult<AttendanceResponse>> GetAttendanceAsync(
@@ -94,7 +95,12 @@ public sealed class AttendanceService : IAttendanceService
         await _queryValidator.ValidateAndThrowAsync(query, cancellationToken);
 
         var attendance = await _attendanceRepository.GetPagedAsync(query, cancellationToken);
-        return attendance.MapItems(attendanceLog => attendanceLog.ToResponse());
+        var employeesById = await GetEmployeeSummariesByIdAsync(attendance.Items.Select(item => item.EmployeeId), cancellationToken);
+        return attendance.MapItems(attendanceLog =>
+        {
+            var employee = employeesById[attendanceLog.EmployeeId];
+            return attendanceLog.ToResponse(employee.Code, employee.Name);
+        });
     }
 
     private Guid RequireAuthenticatedEmployeeId()
@@ -122,4 +128,35 @@ public sealed class AttendanceService : IAttendanceService
 
         return employee;
     }
+
+    private async Task<EmployeeSummary> GetEmployeeSummaryAsync(Guid employeeId, CancellationToken cancellationToken)
+    {
+        var employee = await _employeeRepository.GetByIdAsync(employeeId, cancellationToken);
+        if (employee is null)
+        {
+            throw new NotFoundException("Attendance employee was not found.");
+        }
+
+        return new EmployeeSummary(employee.EmployeeCode, GetEmployeeName(employee));
+    }
+
+    private async Task<Dictionary<Guid, EmployeeSummary>> GetEmployeeSummariesByIdAsync(IEnumerable<Guid> employeeIds, CancellationToken cancellationToken)
+    {
+        var distinctIds = employeeIds.Distinct().ToArray();
+        var result = new Dictionary<Guid, EmployeeSummary>(distinctIds.Length);
+
+        foreach (var id in distinctIds)
+        {
+            result[id] = await GetEmployeeSummaryAsync(id, cancellationToken);
+        }
+
+        return result;
+    }
+
+    private static string GetEmployeeName(Employee employee)
+    {
+        return $"{employee.FirstName} {employee.LastName}".Trim();
+    }
+
+    private sealed record EmployeeSummary(string Code, string Name);
 }

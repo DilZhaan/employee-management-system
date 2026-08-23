@@ -36,7 +36,7 @@ export function AttendancePage() {
     from: searchParams.get("from") || undefined,
     to: searchParams.get("to") || undefined,
     departmentId: searchParams.get("departmentId") || undefined,
-    employeeId: searchParams.get("employeeId") || undefined
+    employeeSearch: searchParams.get("employeeSearch") || undefined
   };
   const myAttendanceQuery = useMyAttendance({ page: 1, pageSize: 10 });
   const myTodayAttendanceQuery = useMyAttendance({ page: 1, pageSize: 20, from: todayDateOnly(), to: todayDateOnly() });
@@ -44,7 +44,7 @@ export function AttendancePage() {
   const departmentsQuery = useDepartments({ page: 1, pageSize: 100, isActive: true });
   const checkInMutation = useCheckIn();
   const checkOutMutation = useCheckOut();
-  const hasFilters = Boolean(query.from || query.to || query.departmentId || query.employeeId);
+  const hasFilters = Boolean(query.from || query.to || query.departmentId || query.employeeSearch);
   const tableQuery = canViewTeam ? attendanceQuery : myAttendanceQuery;
   const pageData = canViewTeam ? attendanceQuery.data : myAttendanceQuery.data;
   const today = todayDateOnly();
@@ -133,8 +133,12 @@ export function AttendancePage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="attendance-employee">Employee ID</Label>
-              <Input id="attendance-employee" value={query.employeeId ?? ""} onChange={(event) => updateSearchParams({ employeeId: event.target.value || undefined })} />
+              <Label htmlFor="attendance-employee">Employee</Label>
+              <Input
+                id="attendance-employee"
+                value={query.employeeSearch ?? ""}
+                onChange={(event) => updateSearchParams({ employeeSearch: event.target.value || undefined })}
+              />
             </div>
             <div className="flex items-end">
               <Button type="button" variant="outline" onClick={resetFilters} disabled={!hasFilters}>

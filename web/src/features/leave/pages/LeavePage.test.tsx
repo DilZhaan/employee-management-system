@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "@/app/providers/AuthProvider";
 import { tokenStorage } from "@/auth/token-storage";
@@ -43,6 +43,7 @@ const request: LeaveRequestResponse = {
   id: leaveId,
   employeeId,
   employeeCode: "EMP001",
+  employeeName: "Demo Employee",
   leaveType: "Annual",
   startDate: "2026-01-10",
   endDate: "2026-01-11",
@@ -57,7 +58,8 @@ const ownRequest: LeaveRequestResponse = {
   ...request,
   id: "66666666-6666-4666-8666-666666666666",
   employeeId: "11111111-1111-1111-1111-111111111111",
-  employeeCode: "MGR001"
+  employeeCode: "MGR001",
+  employeeName: "Manager User"
 };
 
 const department: DepartmentResponse = {
@@ -87,11 +89,17 @@ function renderPage(role: "Admin" | "Manager" | "Employee" = "Admin") {
         <AuthProvider>
           <MemoryRouter initialEntries={["/leave"]}>
             <LeavePage />
+            <LocationProbe />
           </MemoryRouter>
         </AuthProvider>
       </ToastProvider>
     </QueryClientProvider>
   );
+}
+
+function LocationProbe() {
+  const location = useLocation();
+  return <output aria-label="location">{location.pathname + location.search}</output>;
 }
 
 describe("LeavePage", () => {
@@ -172,6 +180,17 @@ describe("LeavePage", () => {
     expect(await screen.findByText("Own request")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /approve leave request/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /reject leave request/i })).not.toBeInTheDocument();
+  });
+
+  it("searches review requests by employee text", async () => {
+    const user = userEvent.setup();
+
+    renderPage("Manager");
+
+    await user.type(await screen.findByLabelText("Employee"), "Amina");
+
+    await waitFor(() => expect(screen.getByLabelText("location")).toHaveTextContent("employeeSearch=Amina"));
+    await waitFor(() => expect(leaveApi.getLeaveRequests).toHaveBeenCalledWith(expect.objectContaining({ employeeSearch: "Amina" })));
   });
 });
 

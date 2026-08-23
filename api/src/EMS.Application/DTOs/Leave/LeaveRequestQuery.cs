@@ -9,4 +9,5 @@ public sealed record LeaveRequestQuery(
     Guid? DepartmentId = null,
     LeaveStatus? Status = null,
     DateOnly? From = null,
-    DateOnly? To = null);
+    DateOnly? To = null,
+    string? EmployeeSearch = null);

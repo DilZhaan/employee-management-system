@@ -66,7 +66,7 @@ export function ApprovalsScreen() {
               }}
               style={({ pressed }) => pressed && styles.cardPressed}
             >
-              <LeaveRequestCard request={item} showEmployeeCode />
+              <LeaveRequestCard request={item} showEmployeeName showEmployeeCode />
             </Pressable>
           )}
           onEndReached={() => {

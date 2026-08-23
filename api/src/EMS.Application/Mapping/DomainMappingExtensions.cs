@@ -35,11 +35,13 @@ internal static class DomainMappingExtensions
             department.CreatedAt);
     }
 
-    public static AttendanceResponse ToResponse(this AttendanceLog attendanceLog)
+    public static AttendanceResponse ToResponse(this AttendanceLog attendanceLog, string employeeCode, string employeeName)
     {
         return new AttendanceResponse(
             attendanceLog.Id,
             attendanceLog.EmployeeId,
+            employeeCode,
+            employeeName,
             attendanceLog.CheckInTime,
             attendanceLog.CheckOutTime,
             attendanceLog.WorkDate,
@@ -47,12 +49,13 @@ internal static class DomainMappingExtensions
             attendanceLog.DeviceType);
     }
 
-    public static LeaveRequestResponse ToResponse(this LeaveRequest leaveRequest, string employeeCode)
+    public static LeaveRequestResponse ToResponse(this LeaveRequest leaveRequest, string employeeCode, string employeeName)
     {
         return new LeaveRequestResponse(
             leaveRequest.Id,
             leaveRequest.EmployeeId,
             employeeCode,
+            employeeName,
             leaveRequest.LeaveType,
             leaveRequest.StartDate,
             leaveRequest.EndDate,

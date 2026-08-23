@@ -6,4 +6,5 @@ public sealed record AttendanceQuery(
     DateOnly? From = null,
     DateOnly? To = null,
     Guid? DepartmentId = null,
-    Guid? EmployeeId = null);
+    Guid? EmployeeId = null,
+    string? EmployeeSearch = null);

@@ -10,9 +10,10 @@ import { formatDateOnly } from "@/utils/date";
 interface LeaveRequestCardProps {
   request: LeaveRequest;
   showEmployeeCode?: boolean;
+  showEmployeeName?: boolean;
 }
 
-export function LeaveRequestCard({ request, showEmployeeCode = false }: LeaveRequestCardProps) {
+export function LeaveRequestCard({ request, showEmployeeCode = false, showEmployeeName = false }: LeaveRequestCardProps) {
   return (
     <Card style={styles.card}>
       <View style={styles.header}>
@@ -23,7 +24,8 @@ export function LeaveRequestCard({ request, showEmployeeCode = false }: LeaveReq
       <AppText muted>
         {formatDateOnly(request.startDate)} — {formatDateOnly(request.endDate)}
       </AppText>
-      {showEmployeeCode ? <AppText muted>Employee: {request.employeeCode}</AppText> : null}
+      {showEmployeeName ? <AppText>Employee: {request.employeeName}</AppText> : null}
+      {showEmployeeCode ? <AppText muted>Code: {request.employeeCode}</AppText> : null}
 
       <AppText numberOfLines={2}>{request.reason}</AppText>
     </Card>

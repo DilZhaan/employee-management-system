@@ -13,6 +13,9 @@ public sealed class AttendanceQueryValidator : AbstractValidator<AttendanceQuery
         RuleFor(query => query.PageSize)
             .InclusiveBetween(1, ValidationConstants.MaximumPageSize);
 
+        RuleFor(query => query.EmployeeSearch)
+            .MaximumLength(100);
+
         RuleFor(query => query)
             .Must(query => !query.From.HasValue || !query.To.HasValue || query.From <= query.To)
             .WithMessage("From date cannot be after to date.");

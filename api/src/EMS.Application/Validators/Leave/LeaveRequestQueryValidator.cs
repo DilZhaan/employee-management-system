@@ -17,6 +17,9 @@ public sealed class LeaveRequestQueryValidator : AbstractValidator<LeaveRequestQ
             .IsInEnum()
             .When(query => query.Status.HasValue);
 
+        RuleFor(query => query.EmployeeSearch)
+            .MaximumLength(100);
+
         RuleFor(query => query)
             .Must(query => !query.From.HasValue || !query.To.HasValue || query.From <= query.To)
             .WithMessage("From date cannot be after to date.");
